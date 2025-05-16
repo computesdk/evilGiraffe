@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Details - Evil Giraffe</title>
+    <link rel="icon" type="image/jpeg" href="images/favicon.jpg">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="top-banner">
+        <div class="banner-content">
+            <a href="home.html" class="back-button" aria-label="Back to home">
+                <span>&larr;</span> Back to Home
+            </a>
+            <span>Model Details</span>
+        </div>
+    </div>
+    
+    <div class="model-container">
+        <h1 id="model-title">Loading Model Details...</h1>
+        
+        <div class="model-description">
+            <p id="model-description-text">Loading model information...</p>
+        </div>
+        
+        <div class="model-actions">
+            <button class="action-button primary" id="install-button" aria-label="Install this model">Install Model</button>
+            <a href="#" class="action-button" id="custom-variant-button" aria-label="Create a custom variant of this model">
+                Create Custom Variant
+            </a>
+            <button class="action-button warning" id="remove-button" aria-label="Remove this model">Remove Model</button>
+        </div>
+        
+        <div id="error-message" class="error-message" style="display: none;">
+            <p>Unable to load model details. Please try again later.</p>
+        </div>
+    </div>
+    
+    <script src="model.js"></script>
+  </body>
+</html>
+</body>
+</html>

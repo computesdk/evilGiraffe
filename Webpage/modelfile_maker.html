@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Model Variant - Evil Giraffe</title>
+    <link rel="icon" type="image/jpeg" href="images/favicon.jpg">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="top-banner">
+        <div class="banner-content">
+            <a href="home.html" class="back-button" aria-label="Back to home">
+                <span>&larr;</span> Back to Home
+            </a>
+            <span>Create Model Variant</span>
+        </div>
+    </div>
+    
+    <div class="model-container">
+        <div class="page-header">
+            <h1>Create Model Variant</h1>
+            <a href="docs.html" target="_blank" class="help-button" aria-label="Open help documentation">
+                <img src="images/help.png" alt="Help" width="64" height="64">
+            </a>
+        </div>
+        
+        <style>
+    .page-header {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .help-button img {
+        cursor: pointer;
+        transition: all 0.2s ease;
+        opacity: 0.9;
+    }
+
+    .help-button img:hover {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+
+    .modelfile-form {
+        margin-top: 1rem;
+    }
+
+    .form-section {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .form-section h2 {
+        margin-bottom: 1.5rem;
+        color: #333;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 1rem;
+    }
+
+    .form-group textarea {
+        height: 100px;
+        resize: vertical;
+    }
+
+    .input-hint {
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+    .form-group input[type="number"] {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 1rem;
+    }
+
+    .button-group {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        justify-content: flex-end;
+    }
+    </style>
+        <div class="modelfile-form">
+            <div class="form-section">
+                <h2 id="base-model-display"></h2>
+                <div class="form-group">
+                    <label for="variant-name">Variant Name:</label>
+                    <input type="text" id="variant-name" placeholder="Enter variant name" required>
+                </div>
+                <div class="form-group">
+                    <label for="temperature">Temperature (0.0 - 2.0):</label>
+                    <input type="number" id="temperature" min="0" max="2" step="0.1" value="0.7">
+                    <div class="input-hint">
+                        Controls creativity. Lower values make responses more deterministic.
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="system-message">System Message:</label>
+                    <textarea id="system-message" placeholder="Enter system message (optional)"></textarea>
+                    <div class="input-hint">
+                        This message will be used as the system prompt for the model.
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="button-group">
+            <button class="action-button primary" id="create-button" aria-label="Create the model variant">
+                Create Variant
+            </button>
+            <button class="action-button warning" id="cancel-button" aria-label="Cancel and return to model page">
+                Cancel
+            </button>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Get the base model from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const baseModel = urlParams.get('model');
+        
+        if (!baseModel) {
+            // If no model is specified, go back to home page
+            alert('No model selected. Please select a model first.');
+            window.location.href = 'home.html';
+            return;
+        }
+        
+        // Update the heading with the model name
+        document.getElementById('base-model-display').textContent = `Creating Variant of ${baseModel}`;
+        
+        // Cancel button click handler
+        document.getElementById('cancel-button').addEventListener('click', () => {
+            // Go back to model page, preserving the base model in URL
+            window.location.href = `model.html?model=${encodeURIComponent(baseModel)}`;
+        });
+        
+        // Create button click handler
+        document.getElementById('create-button').addEventListener('click', async () => {
+            const variantName = document.getElementById('variant-name').value.trim();
+            const temperature = parseFloat(document.getElementById('temperature').value);
+            const systemMessage = document.getElementById('system-message').value.trim();
+            const baseModel = document.getElementById('base-model-display').textContent
+                .replace('Creating Variant of ', '');
+
+            if (!variantName) {
+                alert('Please enter a variant name.');
+                return;
+            }
+
+            if (!baseModel) {
+                alert('No base model selected.');
+                return;
+            }
+
+            try {
+                // Show loading state
+                document.getElementById('create-button').disabled = true;
+                document.getElementById('create-button').textContent = 'Creating...';
+
+                // First check if we can reach the API endpoint
+                const response = await fetch('/api/create-variant', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        baseModel,
+                        variantName,
+                        temperature,
+                        systemMessage
+                    })
+                });
+
+                // Check if we got a successful response
+                if (!response.ok) {
+                    const text = await response.text();
+                    console.error('Response not OK:', text);
+                    throw new Error(`Server error: ${text}`);
+                }
+
+                // Try to parse the response as JSON
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('Variant created successfully!');
+                    // Navigate to the chat page with the new variant
+                    window.location.href = `chat.html?model=${encodeURIComponent(variantName)}`;
+                } else {
+                    alert(`Error creating variant: ${result.error}\nDetails: ${result.details}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                // Try to get the error message from the error object
+                let errorMessage = error.message;
+                if (error.response) {
+                    errorMessage = await error.response.text();
+                }
+                alert(`Failed to create variant: ${errorMessage}`);
+            } finally {
+                // Reset button state
+                document.getElementById('create-button').disabled = false;
+                document.getElementById('create-button').textContent = 'Create Variant';
+            }
+        });
+    });
+    </script>
+</body>
+</html>

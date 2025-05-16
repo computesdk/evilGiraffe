@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evil Giraffe: Home</title>
+    <link rel="icon" type="image/jpeg" href="Images/favicon.jpg">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="top-banner">
+        <div class="banner-content">
+            <span>Welcome to Evil Giraffe: Eater of Realms</span>
+        </div>
+    </div>
+    
+    <div class="home-layout">
+        <div class="menu-container">
+            <div class="dropdown">
+                <button class="dropdown-toggle">Menu</button>
+                <div class="dropdown-menu">
+                <a href="model.html?model=llama3" class="dropdown-item" data-model="llama3">Llama 3 (8B)</a>
+                <a href="model.html?model=mistral" class="dropdown-item" data-model="mistral">Mistral (7B)</a>
+                <a href="model.html?model=phi3" class="dropdown-item" data-model="phi3">Phi-3 (3.8B)</a>
+                <a href="model.html?model=gemma" class="dropdown-item" data-model="gemma">Gemma (7B)</a>
+                <a href="model.html?model=llama2" class="dropdown-item" data-model="llama2">Llama 2 (7B)</a>
+                <a href="model.html?model=mixtral" class="dropdown-item" data-model="mixtral">Mixtral (8x7B)</a>
+                <a href="model.html?model=neural-chat" class="dropdown-item" data-model="neural-chat">Neural Chat (7B)</a>
+                <a href="model.html?model=solar" class="dropdown-item" data-model="solar">Solar (10.7B)</a>
+            </div>
+            </div>
+        </div>
+        
+        <div class="home-container">
+            <header class="home-header">
+            <div class="logo-container">
+                <img src="Images/giraffe-logo.png" alt="Evil Giraffe Logo" class="home-logo">
+            </div>
+            <h1>Evil Giraffe</h1>
+            <p class="tagline">Eater of Realms</p>
+        </header>
+        
+        <main class="home-main">
+            <a href="chat.html" class="chat-button">Start Chatting</a>
+        </main>
+        
+        <footer class="home-footer">
+            <p> 2025 Evil Giraffe. All rights reserved.</p>
+        </footer>
+        </div>
+        
+        <!-- Large Bottom Left Box -->
+        <div class="bottom-left-box">
+            <h3>Model Information</h3>
+            <div class="box-content">
+                <p>Select a model from the menu to view details and options.</p>
+                <ul class="model-stats">
+                    <li>Loading model information...</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <script src="home.js"></script>
+    <script src="script.js"></script>
+            
+</body>
+</html>

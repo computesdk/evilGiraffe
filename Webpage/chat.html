@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Evil Giraffe: Eater of Realms</title>
+    <link rel="icon" type="image/jpeg" href="Images/favicon.jpg" />
+    <link rel="stylesheet" href="styles.css">
+
+  </head>
+  <body>
+    <div class="chat-container">
+      <div class="chat-header">
+        <div class="header-left">
+          <a href="home.html" class="back-button" aria-label="Back to home">
+            <span>&larr;</span> Back to Home
+          </a>
+        </div>
+        <h2 id="versionHeader">Llama-2</h2>
+        <div class="version-button">
+          <img
+            src="Images/giraffe.png"
+            alt="Giraffe Icon"
+            class="giraffe-icon"
+          />
+          <div class="version-dropdown" id="versionDropdown">
+            <h3>Select Version</h3>
+            <div class="loading-message">Loading models...</div>
+          </div>
+        </div>
+      </div>
+      <div class="chat-messages" id="chatMessages">
+        <div class="message ai-message">
+          Hello! I'm ready to chat. Type your message below. To switch between
+          versions, press the Evil Giraffe icon.
+        </div>
+      </div>
+      <div class="chat-input">
+        <input
+          type="text"
+          class="input-field"
+          id="userInput"
+          placeholder="Type your message..."
+        />
+        <button class="send-button">Send</button>
+      </div>
+      <div
+        class="message loading-message"
+        id="loadingMessage"
+        style="display: none"
+      >
+        <div class="loading-spinner"></div>
+        <span>Thinking...</span>
+      </div>
+    </div>
+  </div>
+  <script src="chat.js"></script>
+  </body>
+</html>
