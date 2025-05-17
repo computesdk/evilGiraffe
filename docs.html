@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evil Giraffe - Documentation</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">Evil Giraffe</div>
+        <ul class="nav-links">
+            <li><a href="home.html">Home</a></li>
+            <li><a href="chat.html">Chat</a></li>
+            <li><a href="model.html">Model</a></li>
+            <li><a href="docs.html" class="active">Docs</a></li>
+        </ul>
+    </nav>
+
+    <main class="container">
+        <h1>Documentation</h1>
+        
+        <div class="docs-section">
+            <h2>Getting Started</h2>
+            <p>Learn how to use our AI model and integrate it into your projects.</p>
+            
+            <h3>Quick Start</h3>
+            <ol>
+                <li>Create an account</li>
+                <li>Get your API key</li>
+                <li>Start using our API</li>
+            </ol>
+        </div>
+
+        <div class="docs-section">
+            <h2>API Reference</h2>
+            <p>Detailed documentation for our API endpoints and parameters.</p>
+            
+            <div class="api-endpoints">
+                <h3>Endpoints</h3>
+                <ul>
+                    <li><code>/api/chat</code> - Chat with the model</li>
+                    <li><code>/api/generate</code> - Generate text</li>
+                    <li><code>/api/analyze</code> - Text analysis</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="docs-section">
+            <h2>Examples</h2>
+            <p>View code examples in different programming languages.</p>
+            
+            <div class="code-examples">
+                <h3>Python Example</h3>
+                <pre><code>import requests
+
+response = requests.post(
+    'https://api.evilgiraffe.com/chat',
+    headers={'Authorization': 'Bearer YOUR_API_KEY'},
+    json={'message': 'Hello'}
+)</n></code></pre>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 Evil Giraffe. All rights reserved.</p>
+    </footer>
+</body>
+</html>

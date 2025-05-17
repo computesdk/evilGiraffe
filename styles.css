@@ -61,22 +61,6 @@ body {
     margin-bottom: 3rem;
 }
 
-.cta-button {
-    background-color: #e74c3c;
-    color: white;
-    border: none;
-    padding: 1rem 2rem;
-    border-radius: 5px;
-    font-size: 1.1rem;
-    cursor: pointer;
-    transition: transform 0.3s ease;
-    margin-top: 1rem;
-}
-
-.cta-button:hover {
-    transform: translateY(-2px);
-}
-
 /* Features section */
 .features {
     padding: 4rem 0;
@@ -95,6 +79,20 @@ body {
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    color: #3498db;
+}
+
+.feature-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
 .feature-card:hover {
