@@ -37,7 +37,7 @@
             </div>
             
             <div class="chat-messages" id="chat-messages">
-                <div class="message user-message">
+                <div class="message bot-message">
                     <div class="message-content">
                         <div class="message-text">Welcome! How can I assist you today?</div>
                         <div class="message-timestamp">10:30 AM</div>
@@ -87,17 +87,79 @@
         function sendMessage() {
             const input = document.getElementById('user-input');
             const message = input.value.trim();
+            if (!message) return;
+
+            // Get selected model
+            const modelSelect = document.getElementById('model-select');
+            const selectedModel = modelSelect.value;
             
-            if (message) {
-                addMessage(message, true);
-                input.value = '';
+            if (!selectedModel) {
+                alert('Please select a model first');
+                return;
+            }
+
+            // Add user message to chat
+            addMessage(message, true);
+            input.value = '';
+
+            // Send message to server
+            fetch('/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: message,
+                    model: selectedModel
+                })
+            })
+            .then(response => {
+                console.log('Server response status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Server response data:', data);
+                // Add AI response to chat
+                if (data.response) {
+                    addMessage(data.response, false);
+                } else if (data.message) {
+                    // Try to use 'message' if 'response' isn't available
+                    addMessage(data.message, false);
+                } else {
+                    console.warn('No response or message field in server response:', data);
+                    addMessage('Sorry, no response received from the server.', false);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                addMessage('Sorry, there was an error processing your request.', false);
+            });
+        }
+
+        // Load available models
+        async function loadModels() {
+            try {
+                const response = await fetch('/api/models');
+                const models = await response.json();
+                const modelSelect = document.getElementById('model-select');
                 
-                // Simulate bot response (replace this with actual API call)
-                setTimeout(() => {
-                    addMessage('This is a bot response...', false);
-                }, 1000);
+                // Clear existing options
+                modelSelect.innerHTML = '<option value="">Select a model...</option>';
+                
+                // Add available models
+                models.forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model.name;
+                    option.textContent = model.name;
+                    modelSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading models:', error);
             }
         }
+
+        // Load models when page loads
+        window.addEventListener('load', loadModels);
 
         // Handle Enter key
         document.getElementById('user-input').addEventListener('keypress', function(e) {
