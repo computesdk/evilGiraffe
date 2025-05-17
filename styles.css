@@ -57,6 +57,30 @@ body {
     margin-bottom: 3rem;
 }
 
+/* Content section styles */
+.content-section {
+    padding: 4rem 0;
+    background: #f8f9fa;
+}
+
+.content-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.content-container p {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #333;
+    margin-bottom: 1.5rem;
+}
+
+.content-container h2 {
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+}
+
 /* Features section styles for the home page */
 .features {
     padding: 4rem 0;
@@ -182,6 +206,45 @@ body {
     color: #333;
 }
 
+/* Model Selector Styles */
+.chat-header-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+}
+
+.banner-content {
+    text-align: left;
+}
+
+.model-selector {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.model-selector label {
+    color: white;
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+.model-selector select {
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.model-selector select option {
+    background: white;
+    color: #333;
+}
+
 /* Input field styles */
 .chat-input {
     position: sticky;
@@ -301,6 +364,115 @@ body {
     font-weight: bold;
     color: #3498db;
     margin-top: 1rem;
+}
+
+/* Model Management Styles */
+.model-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.model-header h1 {
+    margin-bottom: 0.5rem;
+}
+
+.model-filters {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.filter-group select {
+    padding: 0.5rem;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    background: white;
+    cursor: pointer;
+}
+
+.model-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.model-card {
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.model-card:hover {
+    transform: translateY(-5px);
+}
+
+.model-header h3 {
+    margin: 0 0 0.5rem 0;
+    color: #333;
+}
+
+.model-type {
+    background: #f8f9fa;
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.model-details {
+    margin: 1rem 0;
+}
+
+.parameters {
+    color: #3498db;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.model-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.install-button,
+.remove-button {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.install-button:hover,
+.remove-button:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+}
+
+.remove-button {
+    background: #e74c3c;
+}
+
+.remove-button:hover {
+    background: #c0392b;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
 }
 
 /* Documentation Page Styles */

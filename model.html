@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Evil Giraffe - Model</title>
+    <title>Evil Giraffe - Model Management</title>
     <link rel="icon" type="image/jpg" href="Images/favicon.jpg">
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -19,23 +19,161 @@
     </nav>
 
     <main class="container">
-        <h1>Our AI Model</h1>
-        
-        <div class="model-section">
-            <div class="model-stats">
-                <div class="stat-card">
-                    <h3>Parameters</h3>
-                    <p class="stat-value">7B+</p>
-                </div>
-                <div class="stat-card">
-                    <h3>Training Data</h3>
-                    <p class="stat-value">2024</p>
-                </div>
-                <div class="stat-card">
-                    <h3>Response Time</h3>
-                    <p class="stat-value">< 1s</p>
-                </div>
+        <div class="model-header">
+            <h1>Model Management</h1>
+            <p>Manage your Ollama AI models</p>
+        </div>
+
+        <div class="model-filters">
+            <div class="filter-group">
+                <label for="model-type">Model Type:</label>
+                <select id="model-type">
+                    <option value="all">All Models</option>
+                    <option value="llama">Llama</option>
+                    <option value="llama2">Llama 2</option>
+                    <option value="mistral">Mistral</option>
+                </select>
             </div>
+            <div class="filter-group">
+                <label for="size">Size:</label>
+                <select id="size">
+                    <option value="all">All Sizes</option>
+                    <option value="small">Small</option>
+                    <option value="medium">Medium</option>
+                    <option value="large">Large</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="model-grid" id="model-grid">
+            <!-- Models will be dynamically added here -->
+        </div>
+
+        <div class="empty-state" style="display: none;">
+            <p>No models found matching your criteria</p>
+        </div>
+
+        <script>
+            // Sample model data (in a real application, this would come from an API)
+            const models = [
+                {
+                    id: 'llama2-7b',
+                    name: 'Llama 2 7B',
+                    type: 'llama2',
+                    size: 'medium',
+                    parameters: '7B',
+                    description: 'Fast and efficient general-purpose model',
+                    installed: false
+                },
+                {
+                    id: 'llama2-13b',
+                    name: 'Llama 2 13B',
+                    type: 'llama2',
+                    size: 'large',
+                    parameters: '13B',
+                    description: 'High-performance model with excellent general knowledge',
+                    installed: false
+                },
+                {
+                    id: 'mistral-7b',
+                    name: 'Mistral 7B',
+                    type: 'mistral',
+                    size: 'medium',
+                    parameters: '7B',
+                    description: 'Specialized for code and technical tasks',
+                    installed: false
+                },
+                {
+                    id: 'tinyllama-1.1b',
+                    name: 'TinyLlama 1.1B',
+                    type: 'llama',
+                    size: 'small',
+                    parameters: '1.1B',
+                    description: 'Lightweight, fast model for quick responses',
+                    installed: false
+                },
+                {
+                    id: 'phi-3.5',
+                    name: 'Phi 3.5',
+                    type: 'phi',
+                    size: 'medium',
+                    parameters: '12B',
+                    description: 'Advanced model with strong reasoning capabilities',
+                    installed: false
+                }
+            ];
+
+            // Initialize the model grid
+            function initializeModels() {
+                const modelGrid = document.getElementById('model-grid');
+                const emptyState = document.querySelector('.empty-state');
+                
+                // Filter models based on selected criteria
+                const filterType = document.getElementById('model-type').value;
+                const filterSize = document.getElementById('size').value;
+                
+                const filteredModels = models.filter(model =>
+                    (filterType === 'all' || model.type === filterType) &&
+                    (filterSize === 'all' || model.size === filterSize)
+                );
+
+                if (filteredModels.length === 0) {
+                    modelGrid.style.display = 'none';
+                    emptyState.style.display = 'block';
+                } else {
+                    modelGrid.style.display = 'grid';
+                    emptyState.style.display = 'none';
+                }
+
+                // Clear existing models
+                modelGrid.innerHTML = '';
+
+                // Add filtered models
+                filteredModels.forEach(model => {
+                    const modelCard = document.createElement('div');
+                    modelCard.className = 'model-card';
+                    modelCard.innerHTML = `
+                        <div class="model-header">
+                            <h3>${model.name}</h3>
+                            <span class="model-type">${model.type}</span>
+                        </div>
+                        <div class="model-details">
+                            <p class="parameters">${model.parameters} parameters</p>
+                            <p>${model.description}</p>
+                        </div>
+                        <div class="model-actions">
+                            <button onclick="toggleInstallation('${model.id}')" class="${model.installed ? 'remove-button' : 'install-button'}">
+                                ${model.installed ? 'Remove' : 'Install'}
+                            </button>
+                        </div>
+                    `;
+                    modelGrid.appendChild(modelCard);
+                });
+            }
+
+            // Install/remove model
+            async function toggleInstallation(modelId) {
+                const model = models.find(m => m.id === modelId);
+                if (!model) return;
+
+                try {
+                    // In a real application, this would call the Ollama API
+                    model.installed = !model.installed;
+                    initializeModels();
+                } catch (error) {
+                    console.error('Error toggling model:', error);
+                    alert('Failed to toggle model installation');
+                }
+            }
+
+            // Initialize filters
+            document.querySelectorAll('.filter-group select').forEach(select => {
+                select.addEventListener('change', initializeModels);
+            });
+
+            // Initialize the page
+            initializeModels();
+        </script>
 
             <div class="model-features">
                 <h2>Key Features</h2>
