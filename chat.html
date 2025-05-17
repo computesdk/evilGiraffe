@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Evil Giraffe - Chat</title>
+    <link rel="icon" type="image/jpg" href="Images/favicon.jpg">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -19,18 +20,27 @@
 
     <main class="container">
         <div class="chat-container">
-            <div class="chat-header">
-                <h1>Chat Interface</h1>
-                <p>Interact with our AI model</p>
+            <div class="chat-header-banner">
+                <div class="banner-content">
+                    <h1>Chat with Evil Giraffe</h1>
+                    <p>Interact with our AI model in real-time</p>
+                </div>
             </div>
             
             <div class="chat-messages" id="chat-messages">
-                <!-- Messages will be added here dynamically -->
+                <div class="message user-message">
+                    <div class="message-content">
+                        <div class="message-text">Welcome! How can I assist you today?</div>
+                        <div class="message-timestamp">10:30 AM</div>
+                    </div>
+                </div>
             </div>
 
             <div class="chat-input">
-                <input type="text" id="user-input" placeholder="Type your message...">
-                <button onclick="sendMessage()">Send</button>
+                <div class="input-group">
+                    <input type="text" id="user-input" placeholder="Type your message...">
+                    <button onclick="sendMessage()" class="send-button">Send</button>
+                </div>
             </div>
         </div>
     </main>
@@ -40,27 +50,52 @@
     </footer>
 
     <script>
+        function addMessage(text, isUser) {
+            const messages = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            
+            const messageText = document.createElement('div');
+            messageText.className = 'message-text';
+            messageText.textContent = text;
+            
+            const timestamp = document.createElement('div');
+            timestamp.className = 'message-timestamp';
+            timestamp.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            messageContent.appendChild(messageText);
+            messageContent.appendChild(timestamp);
+            messageDiv.appendChild(messageContent);
+            messages.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            messages.scrollTop = messages.scrollHeight;
+        }
+
         function sendMessage() {
             const input = document.getElementById('user-input');
-            const messages = document.getElementById('chat-messages');
+            const message = input.value.trim();
             
-            if (input.value.trim()) {
-                // Add user message
-                const userMessage = document.createElement('div');
-                userMessage.className = 'user-message';
-                userMessage.textContent = input.value;
-                messages.appendChild(userMessage);
-                
-                // Add bot response
-                const botMessage = document.createElement('div');
-                botMessage.className = 'bot-message';
-                botMessage.textContent = 'This is a bot response...';
-                messages.appendChild(botMessage);
-                
+            if (message) {
+                addMessage(message, true);
                 input.value = '';
-                messages.scrollTop = messages.scrollHeight;
+                
+                // Simulate bot response (replace this with actual API call)
+                setTimeout(() => {
+                    addMessage('This is a bot response...', false);
+                }, 1000);
             }
         }
+
+        // Handle Enter key
+        document.getElementById('user-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
     </script>
 </body>
 </html>
