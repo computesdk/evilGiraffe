@@ -53,53 +53,110 @@
             <p>No models found matching your criteria</p>
         </div>
 
+        <style>
+            :root {
+                --primary-color: #4a90e2;
+                --secondary-color: #6c7a89;
+                --background-color: #f5f6fa;
+                --text-color: #2c3e50;
+                --border-radius: 8px;
+                --transition-duration: 0.3s;
+            }
+
+            body {
+                margin: 0;
+                padding: 0;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background-color: var(--background-color);
+                color: var(--text-color);
+                line-height: 1.6;
+            }
+
+            /* Installation Notification Styles */
+            .installation-notification {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background-color: white;
+                padding: 16px;
+                border-radius: var(--border-radius);
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                z-index: 1000;
+                animation: slideIn 0.3s ease-out;
+            }
+
+            .notification-content {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .installation-notification h4 {
+                margin: 0;
+                color: var(--primary-color);
+                font-size: 16px;
+            }
+
+            .installation-notification p {
+                margin: 0;
+                font-size: 14px;
+                color: #666;
+            }
+
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+        </style>
+
         <script>
             // Sample model data (in a real application, this would come from an API)
             const models = [
                 {
-                    id: 'llama2-7b',
-                    name: 'Llama 2 7B',
+                    id: 'llama2',
+                    name: 'Llama 2',
                     type: 'llama2',
                     size: 'medium',
                     parameters: '7B',
-                    description: 'Fast and efficient general-purpose model',
-                    installed: false
+                    description: 'Fast and efficient general-purpose model'
                 },
                 {
-                    id: 'llama2-13b',
-                    name: 'Llama 2 13B',
+                    id: 'llama2',
+                    name: 'Llama 2',
                     type: 'llama2',
                     size: 'large',
                     parameters: '13B',
-                    description: 'High-performance model with excellent general knowledge',
-                    installed: false
+                    description: 'High-performance model with excellent general knowledge'
                 },
                 {
-                    id: 'mistral-7b',
-                    name: 'Mistral 7B',
+                    id: 'mistral',
+                    name: 'Mistral',
                     type: 'mistral',
                     size: 'medium',
                     parameters: '7B',
-                    description: 'Specialized for code and technical tasks',
-                    installed: false
+                    description: 'Specialized for code and technical tasks'
                 },
                 {
-                    id: 'tinyllama-1.1b',
-                    name: 'TinyLlama 1.1B',
+                    id: 'tinyllama',
+                    name: 'TinyLlama',
                     type: 'llama',
                     size: 'small',
                     parameters: '1.1B',
-                    description: 'Lightweight, fast model for quick responses',
-                    installed: false
+                    description: 'Lightweight, fast model for quick responses'
                 },
                 {
-                    id: 'phi-3.5',
-                    name: 'Phi 3.5',
+                    id: 'phi',
+                    name: 'Phi',
                     type: 'phi',
                     size: 'medium',
                     parameters: '12B',
-                    description: 'Advanced model with strong reasoning capabilities',
-                    installed: false
+                    description: 'Advanced model with strong reasoning capabilities'
                 }
             ];
 
@@ -142,8 +199,11 @@
                             <p>${model.description}</p>
                         </div>
                         <div class="model-actions">
-                            <button onclick="toggleInstallation('${model.id}')" class="${model.installed ? 'remove-button' : 'install-button'}">
-                                ${model.installed ? 'Remove' : 'Install'}
+                            <button onclick="installModel('${model.id}')" class="install-button">
+                                Install
+                            </button>
+                            <button onclick="deleteModel('${model.id}')" class="delete-button">
+                                Delete
                             </button>
                         </div>
                     `;
@@ -151,18 +211,73 @@
                 });
             }
 
-            // Install/remove model
-            async function toggleInstallation(modelId) {
+            // Install model
+            async function installModel(modelId) {
                 const model = models.find(m => m.id === modelId);
                 if (!model) return;
 
+                // Show notification when installation starts
+                const notification = document.createElement('div');
+                notification.className = 'installation-notification';
+                notification.innerHTML = `
+                    <div class="notification-content">
+                        <h4>Installing ${model.name}...</h4>
+                        <p>This may take a few minutes depending on your internet connection.</p>
+                    </div>
+                `;
+                document.body.appendChild(notification);
+
                 try {
-                    // In a real application, this would call the Ollama API
-                    model.installed = !model.installed;
-                    initializeModels();
+                    const response = await fetch(`/api/install/${modelId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to install model');
+                    }
+
+                    const result = await response.json();
+                    notification.remove();
+                    alert(result.message);
+                    initializeModels(); // Refresh the list
                 } catch (error) {
-                    console.error('Error toggling model:', error);
-                    alert('Failed to toggle model installation');
+                    console.error('Error installing model:', error);
+                    notification.remove();
+                    alert('Failed to install model');
+                }
+            }
+
+            // Delete model
+            async function deleteModel(modelId) {
+                const model = models.find(m => m.id === modelId);
+                if (!model) return;
+
+                if (!confirm(`Are you sure you want to delete ${model.name}?`)) {
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/api/delete/${modelId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const result = await response.json();
+                    
+                    if (!response.ok) {
+                        throw new Error(result.error || 'Failed to delete model');
+                    }
+
+                    alert(result.message || 'Model deleted successfully');
+                    initializeModels(); // Refresh the list
+                } catch (error) {
+                    console.error('Error deleting model:', error);
+                    alert(error.message || 'Failed to delete model');
                 }
             }
 
@@ -178,10 +293,10 @@
             <div class="model-features">
                 <h2>Key Features</h2>
                 <ul>
-                    <li>State-of-the-art language understanding</li>
-                    <li>Fast and efficient inference</li>
-                    <li>Customizable responses</li>
-                    <li>Multi-language support</li>
+                    <li>Will only try to download a couple viruses</li>
+                    <li>We will only use your credit card a little bit</li>
+                    <li>We will only use a little bit of spyware</li>
+                    <li>We deserve your money more anyway</li>
                 </ul>
             </div>
 
@@ -189,12 +304,12 @@
                 <h2>Performance Metrics</h2>
                 <div class="performance-charts">
                     <div class="chart">
-                        <h3>Accuracy</h3>
+                        <h3>Chance to help your take over the world:</h3>
                         <div class="chart-value">95%</div>
                     </div>
                     <div class="chart">
-                        <h3>Latency</h3>
-                        <div class="chart-value">50ms</div>
+                        <h3>Chance to destroy your computer:</h3>
+                        <div class="chart-value">5%</div>
                     </div>
                 </div>
             </div>

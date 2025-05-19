@@ -70,6 +70,56 @@ app.get('/api/models', async (req, res) => {
 });
 
 // Endpoint to handle chat messages
+// Endpoint to install a model
+app.post('/api/install/:model', async (req, res) => {
+    const modelName = req.params.model;
+    console.log(`Attempting to install model: ${modelName}`);
+
+    try {
+        // Use Ollama API to install the model
+        await axios.post('http://localhost:11434/api/pull', {
+            name: modelName
+        });
+
+        console.log(`Successfully installed model: ${modelName}`);
+        res.json({ success: true, message: 'Model installed successfully' });
+    } catch (error) {
+        console.error(`Error installing model ${modelName}:`, error);
+        res.status(500).json({ 
+            error: 'Failed to install model',
+            details: error.message 
+        });
+    }
+});
+
+// Endpoint to delete a model
+app.delete('/api/delete/:model', async (req, res) => {
+    const modelName = req.params.model;
+    console.log(`Attempting to delete model: ${modelName}`);
+
+    try {
+        // Use Ollama API to delete the model
+        const response = await axios.delete('http://localhost:11434/api/delete', {
+            data: { name: modelName },
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!response.data.success) {
+            throw new Error(response.data.error || 'Failed to delete model');
+        }
+
+        console.log(`Successfully deleted model: ${modelName}`);
+        res.json({ success: true, message: 'Model deleted successfully' });
+    } catch (error) {
+        console.error(`Error deleting model ${modelName}:`, error);
+        res.status(500).json({ 
+            error: 'Failed to delete model',
+            details: error.message 
+        });
+    }
+});
+
+// Endpoint to handle chat messages
 app.post('/api/chat', async (req, res) => {
     try {
         // Get message and model from request body

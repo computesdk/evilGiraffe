@@ -443,30 +443,40 @@ body {
     justify-content: flex-end;
 }
 
-.install-button,
-.remove-button {
-    background: #3498db;
-    color: white;
-    border: none;
-    padding: 0.75rem 1.5rem;
+.install-button, .remove-button, .delete-button {
+    padding: 0.5rem 1rem;
     border-radius: 5px;
     cursor: pointer;
-    font-weight: 500;
-    transition: all 0.3s ease;
+    transition: background-color 0.3s ease;
+    margin-left: 0.5rem;
 }
 
-.install-button:hover,
-.remove-button:hover {
-    background: #2980b9;
-    transform: translateY(-2px);
+.install-button, .remove-button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+}
+
+.install-button:hover {
+    background-color: #2980b9;
 }
 
 .remove-button {
-    background: #e74c3c;
+    background-color: #e74c3c;
 }
 
 .remove-button:hover {
-    background: #c0392b;
+    background-color: #c0392b;
+}
+
+.delete-button {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+}
+
+.delete-button:hover {
+    background-color: #c0392b;
 }
 
 .empty-state {
