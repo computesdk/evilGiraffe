@@ -143,7 +143,8 @@ app.post('/api/chat', async (req, res) => {
             const response = await axios.post('http://localhost:11434/api/generate', {
                 model: model,
                 prompt: message,
-                stream: false
+                stream: false,
+                context: ""
             }, {
                 responseType: 'json', // Try with regular JSON response first
                 headers: {
