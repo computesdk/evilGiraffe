@@ -3,6 +3,7 @@ const path = require('path');
 const { exec } = require('child_process');
 const axios = require('axios');
 const bodyParser = require('body-parser');
+const { openDB, addRecord, getAllRecords } = require('./db');
 
 // Initialize Express app
 const app = express();
@@ -53,6 +54,15 @@ app.get('/docs', (req, res) => {
   res.sendFile(path.join(__dirname, 'docs.html'));
 });
 
+// Initialize IndexedDB
+let db;
+openDB().then((database) => {
+    db = database;
+    console.log('IndexedDB initialized successfully');
+}).catch(error => {
+    console.error('Failed to initialize IndexedDB:', error);
+});
+
 // Endpoint to get installed models
 app.get('/api/models', async (req, res) => {
     console.log('Request received for /api/models');
@@ -70,6 +80,104 @@ app.get('/api/models', async (req, res) => {
 });
 
 // Endpoint to handle chat messages
+app.post('/api/chat', async (req, res) => {
+    try {
+        // Get message and model from request body
+        const { message, model } = req.body;
+        console.log('New chat message received:', {
+            model: model,
+            message: message
+        });
+        
+        // Get recent chat history for context
+        const recentRecords = await getAllRecords();
+        
+        // Format chat history as context
+        const context = recentRecords
+            .map(record => `User: ${record.message}\nAI: ${record.response}\n`)
+            .join('\n')
+            .slice(-1000); // Limit context to last 1000 characters to prevent excessive memory usage
+
+        console.log('Sending message to Ollama with context...');
+        console.log('Request body:', {
+            model: model,
+            messages: [{
+                role: "user",
+                content: message
+            }]
+        });
+
+        try {
+            const response = await axios.post('http://localhost:11434/api/generate', {
+                model: model,
+                prompt: message,
+                stream: false,
+                context: context
+            }, {
+                responseType: 'json',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            // Handle the response
+            let responseText = '';
+
+            try {
+                // The /api/generate endpoint returns the response directly in the response property
+                if (response.data?.response) {
+                    responseText = response.data.response;
+                    console.log('Got response text:', responseText);
+                } else {
+                    console.warn('No response found in data');
+                    console.log('Full response:', response.data);
+                }
+            } catch (error) {
+                console.error('Failed to parse Ollama response:', error);
+                console.log('Raw response:', response.data);
+            }
+
+            // Store the chat record in IndexedDB
+            const chatRecord = {
+                message: message,
+                response: responseText,
+                model: model,
+                timestamp: new Date().toISOString()
+            };
+
+            try {
+                await addRecord(chatRecord);
+                console.log('Chat record stored successfully');
+            } catch (error) {
+                console.error('Failed to store chat record:', error);
+            }
+
+            console.log('Final response text:', responseText);
+            res.json({ response: responseText });
+
+        } catch (error) {
+            console.error('Error making request to Ollama:', error);
+            console.error('Error details:', error.response?.data || error.message);
+            if (error.response) {
+                console.error('Response status:', error.response.status);
+                console.error('Response headers:', error.response.headers);
+                console.error('Response data:', error.response.data);
+            }
+            res.status(500).json({ 
+                error: 'Failed to process chat message',
+                details: error.response?.data || error.message 
+            });
+        }
+    } catch (error) {
+        console.error('Error processing chat:', error);
+        console.error('Error details:', error.response?.data || error.message);
+        res.status(500).json({ 
+            error: 'Failed to process chat message',
+            details: error.response?.data || error.message 
+        });
+    }
+});
+
 // Endpoint to install a model
 app.post('/api/install/:model', async (req, res) => {
     const modelName = req.params.model;
@@ -115,82 +223,6 @@ app.delete('/api/delete/:model', async (req, res) => {
         res.status(500).json({ 
             error: 'Failed to delete model',
             details: error.message 
-        });
-    }
-});
-
-// Endpoint to handle chat messages
-app.post('/api/chat', async (req, res) => {
-    try {
-        // Get message and model from request body
-        const { message, model } = req.body;
-        console.log('New chat message received:', {
-            model: model,
-            message: message
-        });
-        
-        // Send message to Ollama using chat API
-        console.log('Sending message to Ollama...');
-        console.log('Request body:', {
-            model: model,
-            messages: [{
-                role: "user",
-                content: message
-            }]
-        });
-
-        try {
-            const response = await axios.post('http://localhost:11434/api/generate', {
-                model: model,
-                prompt: message,
-                stream: false,
-                context: ""
-            }, {
-                responseType: 'json', // Try with regular JSON response first
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            // Handle the response
-            let responseText = '';
-
-            try {
-                // The /api/generate endpoint returns the response directly in the response property
-                if (response.data?.response) {
-                    responseText = response.data.response;
-                    console.log('Got response text:', responseText);
-                } else {
-                    console.warn('No response found in data');
-                    console.log('Full response:', response.data);
-                }
-            } catch (error) {
-                console.error('Failed to parse Ollama response:', error);
-                console.log('Raw response:', response.data);
-            }
-
-            console.log('Final response text:', responseText);
-            res.json({ response: responseText });
-
-        } catch (error) {
-            console.error('Error making request to Ollama:', error);
-            console.error('Error details:', error.response?.data || error.message);
-            if (error.response) {
-                console.error('Response status:', error.response.status);
-                console.error('Response headers:', error.response.headers);
-                console.error('Response data:', error.response.data);
-            }
-            res.status(500).json({ 
-                error: 'Failed to process chat message',
-                details: error.response?.data || error.message 
-            });
-        }
-    } catch (error) {
-        console.error('Error processing chat:', error);
-        console.error('Error details:', error.response?.data || error.message);
-        res.status(500).json({ 
-            error: 'Failed to process chat message',
-            details: error.response?.data || error.message 
         });
     }
 });
