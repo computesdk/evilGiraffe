@@ -18,8 +18,21 @@
         </ul>
     </nav>
 
-    <main class="container">
-        <div class="chat-container">
+    <main class="chat-page-container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h3>Chats</h3>
+                <button id="new-chat-btn" class="new-chat-btn">+ New Chat</button>
+            </div>
+            <div class="chat-list" id="chat-list">
+                <!-- Chat items will be added here dynamically -->
+                <div class="chat-item active" data-chat-id="default">
+                    <span class="chat-title">New Chat</span>
+                    <span class="chat-time">Just now</span>
+                </div>
+            </div>
+        </div>
+        <div class="chat-window">
             <div class="chat-header-banner">
                 <div class="banner-content">
                     <h1>Chat</h1>
@@ -110,7 +123,8 @@
                 },
                 body: JSON.stringify({
                     message: message,
-                    model: selectedModel
+                    model: selectedModel,
+                    chatId: currentChatId
                 })
             })
             .then(response => {
@@ -158,8 +172,96 @@
             }
         }
 
-        // Load models when page loads
-        window.addEventListener('load', loadModels);
+        // Current chat ID
+        let currentChatId = 'default';
+        
+        // Initialize chat list
+        function initChatList() {
+            const chatList = document.getElementById('chat-list');
+            const newChatBtn = document.getElementById('new-chat-btn');
+            
+            // Load saved chats from localStorage
+            const savedChats = JSON.parse(localStorage.getItem('chats') || '[]');
+            
+            // Add saved chats to the list
+            savedChats.forEach(chat => {
+                addChatToSidebar(chat.id, chat.title, chat.timestamp);
+            });
+            
+            // Handle new chat button
+            newChatBtn.addEventListener('click', () => {
+                const chatId = 'chat-' + Date.now();
+                const timestamp = new Date().toLocaleTimeString();
+                const title = 'New Chat';
+                
+                // Save to localStorage
+                const chats = JSON.parse(localStorage.getItem('chats') || '[]');
+                chats.unshift({ id: chatId, title, timestamp });
+                localStorage.setItem('chats', JSON.stringify(chats));
+                
+                // Add to sidebar
+                addChatToSidebar(chatId, title, timestamp);
+                
+                // Switch to new chat
+                switchChat(chatId, title);
+            });
+        }
+        
+        // Add chat to sidebar
+        function addChatToSidebar(chatId, title, timestamp) {
+            const chatList = document.getElementById('chat-list');
+            const chatItem = document.createElement('div');
+            chatItem.className = 'chat-item';
+            chatItem.dataset.chatId = chatId;
+            chatItem.innerHTML = `
+                <span class="chat-title">${title}</span>
+                <span class="chat-time">${timestamp}</span>
+            `;
+            
+            chatItem.addEventListener('click', () => {
+                switchChat(chatId, title);
+            });
+            
+            // Insert at the top of the list
+            if (chatList.firstChild) {
+                chatList.insertBefore(chatItem, chatList.firstChild);
+            } else {
+                chatList.appendChild(chatItem);
+            }
+            
+            // Update active state
+            updateActiveChat(chatId);
+        }
+        
+        // Switch to a different chat
+        function switchChat(chatId, title) {
+            currentChatId = chatId;
+            document.title = `${title} - Evil Giraffe`;
+            
+            // Update active state in UI
+            updateActiveChat(chatId);
+            
+            // TODO: Load chat messages for this chat
+            document.getElementById('chat-messages').innerHTML = '';
+            document.getElementById('user-input').value = '';
+        }
+        
+        // Update active chat in UI
+        function updateActiveChat(activeChatId) {
+            document.querySelectorAll('.chat-item').forEach(item => {
+                if (item.dataset.chatId === activeChatId) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+        
+        // Load models and initialize chat list when page loads
+        window.addEventListener('load', () => {
+            loadModels();
+            initChatList();
+        });
 
         // Handle Enter key
         document.getElementById('user-input').addEventListener('keypress', function(e) {

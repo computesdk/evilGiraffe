@@ -34,23 +34,23 @@ app.use('/Images', express.static(path.join(__dirname, 'Images')));
 
 // Serve CSS file directly
 app.get('/styles.css', (req, res) => {
-    res.sendFile(path.join(__dirname, 'styles.css'));
+    res.sendFile(path.join(__dirname, 'public', 'styles.css'));
 });
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'home.html'));
+  res.sendFile(path.join(__dirname, 'public', 'home.html'));
 });
 
 app.get('/chat', (req, res) => {
-  res.sendFile(path.join(__dirname, 'chat.html'));
+  res.sendFile(path.join(__dirname, 'public', 'chat.html'));
 });
 
 app.get('/model', (req, res) => {
-  res.sendFile(path.join(__dirname, 'model.html'));
+  res.sendFile(path.join(__dirname, 'public', 'model.html'));
 });
 
 app.get('/docs', (req, res) => {
-  res.sendFile(path.join(__dirname, 'docs.html'));
+  res.sendFile(path.join(__dirname, 'public', 'docs.html'));
 });
 
 // Endpoint to get installed models
@@ -129,6 +129,10 @@ app.post('/api/chat', async (req, res) => {
             message: message
         });
         
+        // Initialize messageContext as an empty array to hold Ollama's context
+        let messageContext = [];
+        let responseText = '';
+        
         // Send message to Ollama using chat API
         console.log('Sending message to Ollama...');
         console.log('Request body:', {
@@ -140,10 +144,14 @@ app.post('/api/chat', async (req, res) => {
         });
 
         try {
+            // Log the context being sent to Ollama
+            console.log('Sending context to Ollama:', messageContext.length > 0 ? messageContext : 'No context');
+            
             const response = await axios.post('http://localhost:11434/api/generate', {
                 model: model,
                 prompt: message,
-                stream: false
+                stream: false,
+                context: messageContext.length > 0 ? messageContext : undefined
             }, {
                 responseType: 'json', // Try with regular JSON response first
                 headers: {
@@ -152,8 +160,6 @@ app.post('/api/chat', async (req, res) => {
             });
 
             // Handle the response
-            let responseText = '';
-
             try {
                 // The /api/generate endpoint returns the response directly in the response property
                 if (response.data?.response) {
@@ -162,6 +168,14 @@ app.post('/api/chat', async (req, res) => {
                 } else {
                     console.warn('No response found in data');
                     console.log('Full response:', response.data);
+                }
+
+                // Get and store context if available
+                if (response.data?.context) {
+                    messageContext = response.data.context;
+                    console.log('Got context from Ollama:', messageContext);
+                } else {
+                    console.log('No context received from Ollama');
                 }
             } catch (error) {
                 console.error('Failed to parse Ollama response:', error);
