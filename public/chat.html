@@ -28,7 +28,13 @@
                 <!-- Chat items will be added here dynamically -->
                 <div class="chat-item active" data-chat-id="default">
                     <span class="chat-title">New Chat</span>
-                    <span class="chat-time">Just now</span>
+                    <div class="chat-item-actions">
+                        <button class="delete-chat-btn" onclick="deleteChat(event, 'default')">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -177,27 +183,13 @@
         
         // Initialize chat list
         function initChatList() {
-            const chatList = document.getElementById('chat-list');
             const newChatBtn = document.getElementById('new-chat-btn');
-            
-            // Load saved chats from localStorage
-            const savedChats = JSON.parse(localStorage.getItem('chats') || '[]');
-            
-            // Add saved chats to the list
-            savedChats.forEach(chat => {
-                addChatToSidebar(chat.id, chat.title, chat.timestamp);
-            });
             
             // Handle new chat button
             newChatBtn.addEventListener('click', () => {
                 const chatId = 'chat-' + Date.now();
                 const timestamp = new Date().toLocaleTimeString();
                 const title = 'New Chat';
-                
-                // Save to localStorage
-                const chats = JSON.parse(localStorage.getItem('chats') || '[]');
-                chats.unshift({ id: chatId, title, timestamp });
-                localStorage.setItem('chats', JSON.stringify(chats));
                 
                 // Add to sidebar
                 addChatToSidebar(chatId, title, timestamp);
@@ -213,13 +205,42 @@
             const chatItem = document.createElement('div');
             chatItem.className = 'chat-item';
             chatItem.dataset.chatId = chatId;
-            chatItem.innerHTML = `
-                <span class="chat-title">${title}</span>
-                <span class="chat-time">${timestamp}</span>
-            `;
             
-            chatItem.addEventListener('click', () => {
-                switchChat(chatId, title);
+            // Create chat item content
+            const titleSpan = document.createElement('span');
+            titleSpan.className = 'chat-title';
+            titleSpan.textContent = title;
+            
+            const timeSpan = document.createElement('span');
+            timeSpan.className = 'chat-time';
+            timeSpan.textContent = timestamp;
+            
+            // Create delete button
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'chat-item-actions';
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-chat-btn';
+            deleteBtn.innerHTML = `
+                <svg viewBox="0 0 24 24">
+                    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                </svg>
+            `;
+            deleteBtn.onclick = (e) => deleteChat(e, chatId);
+            
+            actionsDiv.appendChild(deleteBtn);
+            
+            // Assemble the chat item
+            chatItem.appendChild(titleSpan);
+            chatItem.appendChild(actionsDiv);
+            chatItem.appendChild(timeSpan);
+            
+            // Add click handler for switching chats
+            chatItem.addEventListener('click', (e) => {
+                // Don't switch if clicking the delete button
+                if (!e.target.closest('.delete-chat-btn')) {
+                    switchChat(chatId, title);
+                }
             });
             
             // Insert at the top of the list
@@ -233,6 +254,19 @@
             updateActiveChat(chatId);
         }
         
+        // Show welcome message
+        function showWelcomeMessage() {
+            const messagesContainer = document.getElementById('chat-messages');
+            messagesContainer.innerHTML = `
+                <div class="message bot-message">
+                    <div class="message-content">
+                        <div class="message-text">Welcome! How can I assist you today?</div>
+                        <div class="message-timestamp">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                    </div>
+                </div>
+            `;
+        }
+
         // Switch to a different chat
         function switchChat(chatId, title) {
             currentChatId = chatId;
@@ -241,9 +275,36 @@
             // Update active state in UI
             updateActiveChat(chatId);
             
-            // TODO: Load chat messages for this chat
-            document.getElementById('chat-messages').innerHTML = '';
+            // Clear chat messages and show welcome message
+            const messagesContainer = document.getElementById('chat-messages');
+            messagesContainer.innerHTML = '';
+            showWelcomeMessage();
             document.getElementById('user-input').value = '';
+        }
+        
+        // Delete a chat
+        function deleteChat(event, chatId) {
+            event.stopPropagation(); // Prevent triggering the chat item click
+            
+            if (chatId === 'default') {
+                // Don't delete the default chat, just clear it
+                document.getElementById('chat-messages').innerHTML = '';
+                showWelcomeMessage();
+                return;
+            }
+            
+            if (confirm('Are you sure you want to delete this chat?')) {
+                // Remove from UI
+                const chatItem = document.querySelector(`.chat-item[data-chat-id="${chatId}"]`);
+                if (chatItem) {
+                    chatItem.remove();
+                }
+                
+                // If we deleted the active chat, switch to default
+                if (currentChatId === chatId) {
+                    switchChat('default', 'New Chat');
+                }
+            }
         }
         
         // Update active chat in UI
@@ -261,6 +322,8 @@
         window.addEventListener('load', () => {
             loadModels();
             initChatList();
+            // Show welcome message for the default chat
+            showWelcomeMessage();
         });
 
         // Handle Enter key

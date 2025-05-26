@@ -197,6 +197,40 @@ body {
     margin-left: 10px;
 }
 
+.chat-item-actions {
+    display: flex;
+    gap: 8px;
+    margin-left: 10px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.chat-item:hover .chat-item-actions {
+    opacity: 1;
+}
+
+.delete-chat-btn {
+    background: none;
+    border: none;
+    color: #e74c3c;
+    cursor: pointer;
+    padding: 2px 5px;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.delete-chat-btn:hover {
+    background-color: #ffebee;
+}
+
+.delete-chat-btn svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+}
+
 /* Chat window styles */
 .chat-window {
     flex: 1;
