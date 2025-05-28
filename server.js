@@ -3,6 +3,7 @@ const path = require('path');
 const { exec } = require('child_process');
 const axios = require('axios');
 const bodyParser = require('body-parser');
+const stateManager = require('./stateManager');
 
 // Initialize Express app
 const app = express();
@@ -119,6 +120,78 @@ app.delete('/api/delete/:model', async (req, res) => {
     }
 });
 
+// Chat Management Endpoints
+
+// Create a new chat
+app.post('/api/chats', (req, res) => {
+    try {
+        console.log('Creating new chat with data:', req.body);
+        const newChat = stateManager.addChat(req.body);
+        console.log('Successfully created chat:', newChat);
+        res.status(201).json(newChat);
+    } catch (error) {
+        console.error('Error creating chat:', error);
+        res.status(500).json({ 
+            error: 'Failed to create chat', 
+            details: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
+    }
+});
+
+// Get all chats
+app.get('/api/chats', (req, res) => {
+    try {
+        const chats = stateManager.getAllChats();
+        res.json(chats);
+    } catch (error) {
+        console.error('Error fetching chats:', error);
+        res.status(500).json({ error: 'Failed to fetch chats', details: error.message });
+    }
+});
+
+// Get a specific chat
+app.get('/api/chats/:id', (req, res) => {
+    try {
+        const chat = stateManager.getChatById(req.params.id);
+        if (!chat) {
+            return res.status(404).json({ error: 'Chat not found' });
+        }
+        res.json(chat);
+    } catch (error) {
+        console.error(`Error fetching chat ${req.params.id}:`, error);
+        res.status(500).json({ error: 'Failed to fetch chat', details: error.message });
+    }
+});
+
+// Update a chat
+app.put('/api/chats/:id', (req, res) => {
+    try {
+        const updatedChat = stateManager.updateChat(req.params.id, req.body);
+        if (!updatedChat) {
+            return res.status(404).json({ error: 'Chat not found' });
+        }
+        res.json(updatedChat);
+    } catch (error) {
+        console.error(`Error updating chat ${req.params.id}:`, error);
+        res.status(500).json({ error: 'Failed to update chat', details: error.message });
+    }
+});
+
+// Delete a chat
+app.delete('/api/chats/:id', (req, res) => {
+    try {
+        const deleted = stateManager.deleteChat(req.params.id);
+        if (!deleted) {
+            return res.status(404).json({ error: 'Chat not found' });
+        }
+        res.status(204).send();
+    } catch (error) {
+        console.error(`Error deleting chat ${req.params.id}:`, error);
+        res.status(500).json({ error: 'Failed to delete chat', details: error.message });
+    }
+});
+
 // Endpoint to handle chat messages
 app.post('/api/chat', async (req, res) => {
     try {
@@ -208,7 +281,18 @@ app.post('/api/chat', async (req, res) => {
     }
 });
 
+// Start the server
 app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-  exec(`start http://localhost:${PORT}`);
+    console.log(`Server is running on http://localhost:${PORT}`);
+    console.log('Available endpoints:');
+    console.log(`  POST   /api/chats - Create a new chat`);
+    console.log(`  GET    /api/chats - Get all chats`);
+    console.log(`  GET    /api/chats/:id - Get a specific chat`);
+    console.log(`  PUT    /api/chats/:id - Update a chat`);
+    console.log(`  DELETE /api/chats/:id - Delete a chat`);
+    console.log(`  POST   /api/chat - Send a chat message`);
+    console.log('\nMake sure the state.json file is writable by the server.');
+    
+    // Open browser after server starts
+    exec(`start http://localhost:${PORT}`);
 });

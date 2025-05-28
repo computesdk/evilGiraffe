@@ -1,3 +1,112 @@
 {
-  "conversations": []
+  "conversations": [
+    {
+      "id": "1748437919931",
+      "title": "New Chat",
+      "model": "llama3",
+      "messages": [],
+      "context": {
+        "systemPrompt": "You are a helpful assistant",
+        "temperature": 0.7
+      },
+      "createdAt": "2025-05-28T13:11:59.931Z",
+      "updatedAt": "2025-05-28T13:11:59.931Z"
+    },
+    {
+      "id": "1748437937888",
+      "title": "New Chat",
+      "model": "llama3",
+      "messages": [],
+      "context": {
+        "systemPrompt": "You are a helpful assistant",
+        "temperature": 0.7
+      },
+      "createdAt": "2025-05-28T13:12:17.888Z",
+      "updatedAt": "2025-05-28T13:12:17.888Z"
+    },
+    {
+      "id": "1748437956644",
+      "title": "New Chat",
+      "model": "llama3",
+      "messages": [],
+      "context": {
+        "systemPrompt": "You are a helpful assistant",
+        "temperature": 0.7
+      },
+      "createdAt": "2025-05-28T13:12:36.645Z",
+      "updatedAt": "2025-05-28T13:12:36.645Z"
+    },
+    {
+      "id": "1748437960527",
+      "title": "New Chat",
+      "model": "llama3",
+      "messages": [],
+      "context": {
+        "systemPrompt": "You are a helpful assistant",
+        "temperature": 0.7
+      },
+      "createdAt": "2025-05-28T13:12:40.527Z",
+      "updatedAt": "2025-05-28T13:12:40.527Z"
+    },
+    {
+      "id": "1748437981130",
+      "title": "New Chat",
+      "model": "llama3",
+      "messages": [],
+      "context": {
+        "systemPrompt": "You are a helpful assistant",
+        "temperature": 0.7
+      },
+      "createdAt": "2025-05-28T13:13:01.130Z",
+      "updatedAt": "2025-05-28T13:13:01.130Z"
+    },
+    {
+      "id": "1748446852748",
+      "title": "New Chat",
+      "model": "llama3",
+      "messages": [],
+      "context": {
+        "systemPrompt": "You are a helpful assistant",
+        "temperature": 0.7
+      },
+      "createdAt": "2025-05-28T15:40:52.748Z",
+      "updatedAt": "2025-05-28T15:40:52.748Z"
+    },
+    {
+      "id": "1748447137775",
+      "title": "New Chat",
+      "model": "llama3",
+      "messages": [],
+      "context": {
+        "systemPrompt": "You are a helpful assistant",
+        "temperature": 0.7
+      },
+      "createdAt": "2025-05-28T15:45:37.775Z",
+      "updatedAt": "2025-05-28T15:45:37.775Z"
+    },
+    {
+      "id": "1748447398455",
+      "title": "New Chat",
+      "model": "llama3",
+      "messages": [],
+      "context": {
+        "systemPrompt": "You are a helpful assistant",
+        "temperature": 0.7
+      },
+      "createdAt": "2025-05-28T15:49:58.455Z",
+      "updatedAt": "2025-05-28T15:49:58.455Z"
+    },
+    {
+      "id": "1748447399012",
+      "title": "New Chat",
+      "model": "llama3",
+      "messages": [],
+      "context": {
+        "systemPrompt": "You are a helpful assistant",
+        "temperature": 0.7
+      },
+      "createdAt": "2025-05-28T15:49:59.012Z",
+      "updatedAt": "2025-05-28T15:49:59.012Z"
+    }
+  ]
 }

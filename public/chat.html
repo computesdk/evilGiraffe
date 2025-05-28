@@ -6,6 +6,37 @@
     <title>Evil Giraffe - Chat</title>
     <link rel="icon" type="image/jpg" href="Images/favicon.jpg">
     <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Welcome message styles */
+        #welcome-message {
+            color: #666;
+            text-align: center;
+            padding: 2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        #welcome-message h2 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+        }
+
+        #welcome-message p {
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        /* Center chat messages content when empty */
+        .chat-messages:empty {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 300px;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar">
@@ -26,16 +57,6 @@
             </div>
             <div class="chat-list" id="chat-list">
                 <!-- Chat items will be added here dynamically -->
-                <div class="chat-item active" data-chat-id="default">
-                    <span class="chat-title">New Chat</span>
-                    <div class="chat-item-actions">
-                        <button class="delete-chat-btn" onclick="deleteChat(event, 'default')">
-                            <svg viewBox="0 0 24 24">
-                                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
             </div>
         </div>
         <div class="chat-window">
@@ -56,11 +77,10 @@
             </div>
             
             <div class="chat-messages" id="chat-messages">
-                <div class="message bot-message">
-                    <div class="message-content">
-                        <div class="message-text">Welcome! How can I assist you today?</div>
-                        <div class="message-timestamp">10:30 AM</div>
-                    </div>
+                <div id="welcome-message" class="welcome-message">
+                    <h2>Welcome to Evil Giraffe Chat</h2>
+                    <p>Get started by creating a new chat using the button above.</p>
+                    <p>You can select different AI models from the dropdown menu.</p>
                 </div>
             </div>
 
@@ -187,29 +207,26 @@
             
             // Handle new chat button
             newChatBtn.addEventListener('click', () => {
-                const chatId = 'chat-' + Date.now();
-                const timestamp = new Date().toLocaleTimeString();
-                const title = 'New Chat';
-                
-                // Add to sidebar
-                addChatToSidebar(chatId, title, timestamp);
-                
-                // Switch to new chat
-                switchChat(chatId, title);
+                createNewChat();
             });
         }
         
         // Add chat to sidebar
-        function addChatToSidebar(chatId, title, timestamp) {
+        function addChatToSidebar(chat) {
             const chatList = document.getElementById('chat-list');
             const chatItem = document.createElement('div');
             chatItem.className = 'chat-item';
-            chatItem.dataset.chatId = chatId;
+            chatItem.dataset.chatId = chat.id;
+            
+            // Format timestamp if it's a date string, otherwise use current time
+            const timestamp = chat.createdAt ? 
+                new Date(chat.createdAt).toLocaleTimeString() : 
+                new Date().toLocaleTimeString();
             
             // Create chat item content
             const titleSpan = document.createElement('span');
             titleSpan.className = 'chat-title';
-            titleSpan.textContent = title;
+            titleSpan.textContent = chat.title || 'New Chat';
             
             const timeSpan = document.createElement('span');
             timeSpan.className = 'chat-time';
@@ -226,7 +243,7 @@
                     <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
                 </svg>
             `;
-            deleteBtn.onclick = (e) => deleteChat(e, chatId);
+            deleteBtn.onclick = (e) => deleteChat(e, chat.id);
             
             actionsDiv.appendChild(deleteBtn);
             
@@ -239,7 +256,7 @@
             chatItem.addEventListener('click', (e) => {
                 // Don't switch if clicking the delete button
                 if (!e.target.closest('.delete-chat-btn')) {
-                    switchChat(chatId, title);
+                    switchChat(chat.id, chat.title || 'New Chat');
                 }
             });
             
@@ -251,7 +268,9 @@
             }
             
             // Update active state
-            updateActiveChat(chatId);
+            updateActiveChat(chat.id);
+            
+            return chatItem;
         }
         
         // Show welcome message
@@ -278,9 +297,53 @@
             // Clear chat messages and show welcome message
             const messagesContainer = document.getElementById('chat-messages');
             messagesContainer.innerHTML = '';
-            showWelcomeMessage();
-            document.getElementById('user-input').value = '';
+            
+            // Only show welcome message if this is the default chat or there are no messages
+            if (chatId === 'default' || !document.querySelector(`.chat-item[data-chat-id="${chatId}"]`)) {
+                showWelcomeMessage();
+            } else {
+                // TODO: Load chat messages for the selected chat
+            }
+            
+            document.getElementById('user-input').focus();
         }
+        
+        // Create a new chat
+        async function createNewChat() {
+            try {
+                const response = await fetch('/api/chats', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        title: 'New Chat',
+                        model: 'llama3',  // Default model
+                        context: {
+                            systemPrompt: 'You are a helpful assistant',
+                            temperature: 0.7
+                        }
+                    })
+                });
+                
+                if (!response.ok) throw new Error('Failed to create chat');
+                
+                const newChat = await response.json();
+                
+                // Add the new chat to the sidebar
+                addChatToSidebar(newChat);
+                
+                // Switch to the new chat
+                switchChat(newChat.id, newChat.title);
+                
+                return newChat;
+            } catch (error) {
+                console.error('Error creating chat:', error);
+                alert('Failed to create new chat. Please try again.');
+            }
+        }
+        
+
         
         // Delete a chat
         function deleteChat(event, chatId) {
@@ -318,10 +381,23 @@
             });
         }
         
+        // Function to show/hide welcome message based on chat list
+        function updateWelcomeMessage() {
+            const chatList = document.getElementById('chat-list');
+            const welcomeMessage = document.getElementById('welcome-message');
+            
+            if (chatList.children.length === 0) {
+                welcomeMessage.style.display = 'block';
+            } else {
+                welcomeMessage.style.display = 'none';
+            }
+        }
+
         // Load models and initialize chat list when page loads
         window.addEventListener('load', () => {
             loadModels();
             initChatList();
+            updateWelcomeMessage();
             // Show welcome message for the default chat
             showWelcomeMessage();
         });
