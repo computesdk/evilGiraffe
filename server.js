@@ -3,7 +3,7 @@ const path = require('path');
 const { exec } = require('child_process');
 const axios = require('axios');
 const bodyParser = require('body-parser');
-const { openDB, addUserMessage, addAIResponse, getContext } = require('./db');
+const stateManager = require('./stateManager');
 
 // Initialize Express app
 const app = express();
@@ -35,35 +35,23 @@ app.use('/Images', express.static(path.join(__dirname, 'Images')));
 
 // Serve CSS file directly
 app.get('/styles.css', (req, res) => {
-    res.sendFile(path.join(__dirname, 'styles.css'));
+    res.sendFile(path.join(__dirname, 'public', 'styles.css'));
 });
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'home.html'));
+  res.sendFile(path.join(__dirname, 'public', 'home.html'));
 });
 
 app.get('/chat', (req, res) => {
-  res.sendFile(path.join(__dirname, 'chat.html'));
+  res.sendFile(path.join(__dirname, 'public', 'chat.html'));
 });
 
 app.get('/model', (req, res) => {
-  res.sendFile(path.join(__dirname, 'model.html'));
+  res.sendFile(path.join(__dirname, 'public', 'model.html'));
 });
 
 app.get('/docs', (req, res) => {
-  res.sendFile(path.join(__dirname, 'docs.html'));
-});
-
-// Initialize database
-openDB().then(() => {
-    console.log('Database initialized successfully');
-}).catch(error => {
-    console.error('Failed to initialize IndexedDB:', error);
-});
-
-// Start the server
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+  res.sendFile(path.join(__dirname, 'public', 'docs.html'));
 });
 
 // Endpoint to get installed models
@@ -262,7 +250,179 @@ app.delete('/api/delete/:model', async (req, res) => {
     }
 });
 
+// Chat Management Endpoints
+
+// Create a new chat
+app.post('/api/chats', (req, res) => {
+    try {
+        console.log('Creating new chat with data:', req.body);
+        const newChat = stateManager.addChat(req.body);
+        console.log('Successfully created chat:', newChat);
+        res.status(201).json(newChat);
+    } catch (error) {
+        console.error('Error creating chat:', error);
+        res.status(500).json({ 
+            error: 'Failed to create chat', 
+            details: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
+    }
+});
+
+// Get all chats
+app.get('/api/chats', (req, res) => {
+    try {
+        const chats = stateManager.getAllChats();
+        res.json(chats);
+    } catch (error) {
+        console.error('Error fetching chats:', error);
+        res.status(500).json({ error: 'Failed to fetch chats', details: error.message });
+    }
+});
+
+// Get a specific chat
+app.get('/api/chats/:id', (req, res) => {
+    try {
+        const chat = stateManager.getChatById(req.params.id);
+        if (!chat) {
+            return res.status(404).json({ error: 'Chat not found' });
+        }
+        res.json(chat);
+    } catch (error) {
+        console.error(`Error fetching chat ${req.params.id}:`, error);
+        res.status(500).json({ error: 'Failed to fetch chat', details: error.message });
+    }
+});
+
+// Update a chat
+app.put('/api/chats/:id', (req, res) => {
+    try {
+        const updatedChat = stateManager.updateChat(req.params.id, req.body);
+        if (!updatedChat) {
+            return res.status(404).json({ error: 'Chat not found' });
+        }
+        res.json(updatedChat);
+    } catch (error) {
+        console.error(`Error updating chat ${req.params.id}:`, error);
+        res.status(500).json({ error: 'Failed to update chat', details: error.message });
+    }
+});
+
+// Delete a chat
+app.delete('/api/chats/:id', (req, res) => {
+    try {
+        const deleted = stateManager.deleteChat(req.params.id);
+        if (!deleted) {
+            return res.status(404).json({ error: 'Chat not found' });
+        }
+        res.status(204).send();
+    } catch (error) {
+        console.error(`Error deleting chat ${req.params.id}:`, error);
+        res.status(500).json({ error: 'Failed to delete chat', details: error.message });
+    }
+});
+
+// Endpoint to handle chat messages
+app.post('/api/chat', async (req, res) => {
+    try {
+        // Get message and model from request body
+        const { message, model } = req.body;
+        console.log('New chat message received:', {
+            model: model,
+            message: message
+        });
+        
+        // Initialize messageContext as an empty array to hold Ollama's context
+        let messageContext = [];
+        let responseText = '';
+        
+        // Send message to Ollama using chat API
+        console.log('Sending message to Ollama...');
+        console.log('Request body:', {
+            model: model,
+            messages: [{
+                role: "user",
+                content: message
+            }]
+        });
+
+        try {
+            // Log the context being sent to Ollama
+            console.log('Sending context to Ollama:', messageContext.length > 0 ? messageContext : 'No context');
+            
+            const response = await axios.post('http://localhost:11434/api/generate', {
+                model: model,
+                prompt: message,
+                stream: false,
+                context: messageContext.length > 0 ? messageContext : undefined
+            }, {
+                responseType: 'json', // Try with regular JSON response first
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            // Handle the response
+            try {
+                // The /api/generate endpoint returns the response directly in the response property
+                if (response.data?.response) {
+                    responseText = response.data.response;
+                    console.log('Got response text:', responseText);
+                } else {
+                    console.warn('No response found in data');
+                    console.log('Full response:', response.data);
+                }
+
+                // Get and store context if available
+                if (response.data?.context) {
+                    messageContext = response.data.context;
+                    console.log('Got context from Ollama:', messageContext);
+                } else {
+                    console.log('No context received from Ollama');
+                }
+            } catch (error) {
+                console.error('Failed to parse Ollama response:', error);
+                console.log('Raw response:', response.data);
+            }
+
+            console.log('Final response text:', responseText);
+            res.json({ response: responseText });
+
+        } catch (error) {
+            console.error('Error making request to Ollama:', error);
+            console.error('Error details:', error.response?.data || error.message);
+            if (error.response) {
+                console.error('Response status:', error.response.status);
+                console.error('Response headers:', error.response.headers);
+                console.error('Response data:', error.response.data);
+            }
+            res.status(500).json({ 
+                error: 'Failed to process chat message',
+                details: error.response?.data || error.message 
+            });
+        }
+    } catch (error) {
+        console.error('Error processing chat:', error);
+        console.error('Error details:', error.response?.data || error.message);
+        res.status(500).json({ 
+            error: 'Failed to process chat message',
+            details: error.response?.data || error.message 
+        });
+    }
+});
+
+// Start the server
 app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-  exec(`start http://localhost:${PORT}`);
+    console.log(`Server is running on http://localhost:${PORT}`);
+    console.log('Available endpoints:');
+    console.log(`  POST   /api/chats - Create a new chat`);
+    console.log(`  GET    /api/chats - Get all chats`);
+    console.log(`  GET    /api/chats/:id - Get a specific chat`);
+    console.log(`  PUT    /api/chats/:id - Update a chat`);
+    console.log(`  DELETE /api/chats/:id - Delete a chat`);
+    console.log(`  POST   /api/chat - Send a chat message`);
+    console.log('\nMake sure the state.json file is writable by the server.');
+    
+    // Open browser after server starts
+    exec(`start http://localhost:${PORT}`);
 });

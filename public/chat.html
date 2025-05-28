@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evil Giraffe - Chat</title>
+    <link rel="icon" type="image/jpg" href="Images/favicon.jpg">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Welcome message styles */
+        #welcome-message {
+            color: #666;
+            text-align: center;
+            padding: 2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        #welcome-message h2 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+        }
+
+        #welcome-message p {
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        /* Center chat messages content when empty */
+        .chat-messages:empty {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 300px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">Evil Giraffe</div>
+        <ul class="nav-links">
+            <li><a href="home.html">Home</a></li>
+            <li><a href="chat.html" class="active">Chat</a></li>
+            <li><a href="model.html">Model</a></li>
+            <li><a href="docs.html">Docs</a></li>
+        </ul>
+    </nav>
+
+    <main class="chat-page-container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h3>Chats</h3>
+                <button id="new-chat-btn" class="new-chat-btn">+ New Chat</button>
+            </div>
+            <div class="chat-list" id="chat-list">
+                <!-- Chat items will be added here dynamically -->
+            </div>
+        </div>
+        <div class="chat-window">
+            <div class="chat-header-banner">
+                <div class="banner-content">
+                    <h1>Chat</h1>
+                    <p>Chat with your AI-powered assistant</p>
+                </div>
+                <div class="model-selector">
+                    <label for="model-select">Select Model:</label>
+                    <select id="model-select">
+                        <option value="llama2-7b">Llama 2 7B</option>
+                        <option value="mistral-7b">Mistral 7B</option>
+                        <option value="tinyllama-1.1b">TinyLlama 1.1B</option>
+                        <option value="phi-3.5">Phi 3.5</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="chat-messages" id="chat-messages">
+                <div id="welcome-message" class="welcome-message">
+                    <h2>Welcome to Evil Giraffe Chat</h2>
+                    <p>Get started by creating a new chat using the button above.</p>
+                    <p>You can select different AI models from the dropdown menu.</p>
+                </div>
+            </div>
+
+            <div class="chat-input">
+                <div class="input-group">
+                    <input type="text" id="user-input" placeholder="Type your message...">
+                    <button onclick="sendMessage()" class="send-button">Send</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 Evil Giraffe. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function addMessage(text, isUser) {
+            const messages = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            
+            const messageText = document.createElement('div');
+            messageText.className = 'message-text';
+            messageText.textContent = text;
+            
+            const timestamp = document.createElement('div');
+            timestamp.className = 'message-timestamp';
+            timestamp.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            messageContent.appendChild(messageText);
+            messageContent.appendChild(timestamp);
+            messageDiv.appendChild(messageContent);
+            messages.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('user-input');
+            const message = input.value.trim();
+            if (!message) return;
+
+            // Get selected model
+            const modelSelect = document.getElementById('model-select');
+            const selectedModel = modelSelect.value;
+            
+            if (!selectedModel) {
+                alert('Please select a model first');
+                return;
+            }
+
+            // Add user message to chat
+            addMessage(message, true);
+            input.value = '';
+
+            // Send message to server
+            fetch('/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: message,
+                    model: selectedModel,
+                    chatId: currentChatId
+                })
+            })
+            .then(response => {
+                console.log('Server response status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Server response data:', data);
+                // Add AI response to chat
+                if (data.response) {
+                    addMessage(data.response, false);
+                } else if (data.message) {
+                    // Try to use 'message' if 'response' isn't available
+                    addMessage(data.message, false);
+                } else {
+                    console.warn('No response or message field in server response:', data);
+                    addMessage('Sorry, no response received from the server.', false);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                addMessage('Sorry, there was an error processing your request.', false);
+            });
+        }
+
+        // Load available models
+        async function loadModels() {
+            try {
+                const response = await fetch('/api/models');
+                const models = await response.json();
+                const modelSelect = document.getElementById('model-select');
+                
+                // Clear existing options
+                modelSelect.innerHTML = '<option value="">Select a model...</option>';
+                
+                // Add available models
+                models.forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model.name;
+                    option.textContent = model.name;
+                    modelSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading models:', error);
+            }
+        }
+
+        // Current chat ID
+        let currentChatId = 'default';
+        
+        // Initialize chat list
+        function initChatList() {
+            const newChatBtn = document.getElementById('new-chat-btn');
+            
+            // Handle new chat button
+            newChatBtn.addEventListener('click', () => {
+                createNewChat();
+            });
+        }
+        
+        // Add chat to sidebar
+        function addChatToSidebar(chat) {
+            const chatList = document.getElementById('chat-list');
+            const chatItem = document.createElement('div');
+            chatItem.className = 'chat-item';
+            chatItem.dataset.chatId = chat.id;
+            
+            // Format timestamp if it's a date string, otherwise use current time
+            const timestamp = chat.createdAt ? 
+                new Date(chat.createdAt).toLocaleTimeString() : 
+                new Date().toLocaleTimeString();
+            
+            // Create chat item content
+            const titleSpan = document.createElement('span');
+            titleSpan.className = 'chat-title';
+            titleSpan.textContent = chat.title || 'New Chat';
+            
+            const timeSpan = document.createElement('span');
+            timeSpan.className = 'chat-time';
+            timeSpan.textContent = timestamp;
+            
+            // Create delete button
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'chat-item-actions';
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-chat-btn';
+            deleteBtn.innerHTML = `
+                <svg viewBox="0 0 24 24">
+                    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                </svg>
+            `;
+            deleteBtn.onclick = (e) => deleteChat(e, chat.id);
+            
+            actionsDiv.appendChild(deleteBtn);
+            
+            // Assemble the chat item
+            chatItem.appendChild(titleSpan);
+            chatItem.appendChild(actionsDiv);
+            chatItem.appendChild(timeSpan);
+            
+            // Add click handler for switching chats
+            chatItem.addEventListener('click', (e) => {
+                // Don't switch if clicking the delete button
+                if (!e.target.closest('.delete-chat-btn')) {
+                    switchChat(chat.id, chat.title || 'New Chat');
+                }
+            });
+            
+            // Insert at the top of the list
+            if (chatList.firstChild) {
+                chatList.insertBefore(chatItem, chatList.firstChild);
+            } else {
+                chatList.appendChild(chatItem);
+            }
+            
+            // Update active state
+            updateActiveChat(chat.id);
+            
+            return chatItem;
+        }
+        
+        // Show welcome message
+        function showWelcomeMessage() {
+            const messagesContainer = document.getElementById('chat-messages');
+            messagesContainer.innerHTML = `
+                <div class="message bot-message">
+                    <div class="message-content">
+                        <div class="message-text">Welcome! How can I assist you today?</div>
+                        <div class="message-timestamp">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Switch to a different chat
+        function switchChat(chatId, title) {
+            currentChatId = chatId;
+            document.title = `${title} - Evil Giraffe`;
+            
+            // Update active state in UI
+            updateActiveChat(chatId);
+            
+            // Clear chat messages and show welcome message
+            const messagesContainer = document.getElementById('chat-messages');
+            messagesContainer.innerHTML = '';
+            
+            // Only show welcome message if this is the default chat or there are no messages
+            if (chatId === 'default' || !document.querySelector(`.chat-item[data-chat-id="${chatId}"]`)) {
+                showWelcomeMessage();
+            } else {
+                // TODO: Load chat messages for the selected chat
+            }
+            
+            document.getElementById('user-input').focus();
+        }
+        
+        // Create a new chat
+        async function createNewChat() {
+            try {
+                const response = await fetch('/api/chats', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        title: 'New Chat',
+                        model: 'llama3',  // Default model
+                        context: {
+                            systemPrompt: 'You are a helpful assistant',
+                            temperature: 0.7
+                        }
+                    })
+                });
+                
+                if (!response.ok) throw new Error('Failed to create chat');
+                
+                const newChat = await response.json();
+                
+                // Add the new chat to the sidebar
+                addChatToSidebar(newChat);
+                
+                // Switch to the new chat
+                switchChat(newChat.id, newChat.title);
+                
+                return newChat;
+            } catch (error) {
+                console.error('Error creating chat:', error);
+                alert('Failed to create new chat. Please try again.');
+            }
+        }
+        
+
+        
+        // Delete a chat
+        function deleteChat(event, chatId) {
+            event.stopPropagation(); // Prevent triggering the chat item click
+            
+            if (chatId === 'default') {
+                // Don't delete the default chat, just clear it
+                document.getElementById('chat-messages').innerHTML = '';
+                showWelcomeMessage();
+                return;
+            }
+            
+            if (confirm('Are you sure you want to delete this chat?')) {
+                // Remove from UI
+                const chatItem = document.querySelector(`.chat-item[data-chat-id="${chatId}"]`);
+                if (chatItem) {
+                    chatItem.remove();
+                }
+                
+                // If we deleted the active chat, switch to default
+                if (currentChatId === chatId) {
+                    switchChat('default', 'New Chat');
+                }
+            }
+        }
+        
+        // Update active chat in UI
+        function updateActiveChat(activeChatId) {
+            document.querySelectorAll('.chat-item').forEach(item => {
+                if (item.dataset.chatId === activeChatId) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+        
+        // Function to show/hide welcome message based on chat list
+        function updateWelcomeMessage() {
+            const chatList = document.getElementById('chat-list');
+            const welcomeMessage = document.getElementById('welcome-message');
+            
+            if (chatList.children.length === 0) {
+                welcomeMessage.style.display = 'block';
+            } else {
+                welcomeMessage.style.display = 'none';
+            }
+        }
+
+        // Load models and initialize chat list when page loads
+        window.addEventListener('load', () => {
+            loadModels();
+            initChatList();
+            updateWelcomeMessage();
+            // Show welcome message for the default chat
+            showWelcomeMessage();
+        });
+
+        // Handle Enter key
+        document.getElementById('user-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
