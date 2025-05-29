@@ -1,162 +1,185 @@
 {
   "conversations": [
     {
-      "id": "1748437919931",
+      "id": "1748537350864",
       "title": "New Chat",
-      "model": "llama3",
-      "messages": [],
-      "context": {
-        "systemPrompt": "You are a helpful assistant",
-        "temperature": 0.7
-      },
-      "createdAt": "2025-05-28T13:11:59.931Z",
-      "updatedAt": "2025-05-28T13:11:59.931Z"
-    },
-    {
-      "id": "1748437937888",
-      "title": "New Chat",
-      "model": "llama3",
-      "messages": [],
-      "context": {
-        "systemPrompt": "You are a helpful assistant",
-        "temperature": 0.7
-      },
-      "createdAt": "2025-05-28T13:12:17.888Z",
-      "updatedAt": "2025-05-28T13:12:17.888Z"
-    },
-    {
-      "id": "1748437956644",
-      "title": "New Chat",
-      "model": "llama3",
-      "messages": [],
-      "context": {
-        "systemPrompt": "You are a helpful assistant",
-        "temperature": 0.7
-      },
-      "createdAt": "2025-05-28T13:12:36.645Z",
-      "updatedAt": "2025-05-28T13:12:36.645Z"
-    },
-    {
-      "id": "1748437960527",
-      "title": "New Chat",
-      "model": "llama3",
-      "messages": [],
-      "context": {
-        "systemPrompt": "You are a helpful assistant",
-        "temperature": 0.7
-      },
-      "createdAt": "2025-05-28T13:12:40.527Z",
-      "updatedAt": "2025-05-28T13:12:40.527Z"
-    },
-    {
-      "id": "1748437981130",
-      "title": "New Chat",
-      "model": "llama3",
-      "messages": [],
-      "context": {
-        "systemPrompt": "You are a helpful assistant",
-        "temperature": 0.7
-      },
-      "createdAt": "2025-05-28T13:13:01.130Z",
-      "updatedAt": "2025-05-28T13:13:01.130Z"
-    },
-    {
-      "id": "1748446852748",
-      "title": "New Chat",
-      "model": "llama3",
-      "messages": [],
-      "context": {
-        "systemPrompt": "You are a helpful assistant",
-        "temperature": 0.7
-      },
-      "createdAt": "2025-05-28T15:40:52.748Z",
-      "updatedAt": "2025-05-28T15:40:52.748Z"
-    },
-    {
-      "id": "1748447137775",
-      "title": "New Chat",
-      "model": "llama3",
-      "messages": [],
-      "context": {
-        "systemPrompt": "You are a helpful assistant",
-        "temperature": 0.7
-      },
-      "createdAt": "2025-05-28T15:45:37.775Z",
-      "updatedAt": "2025-05-28T15:45:37.775Z"
-    },
-    {
-      "id": "1748447398455",
-      "title": "New Chat",
-      "model": "llama3",
-      "messages": [],
-      "context": {
-        "systemPrompt": "You are a helpful assistant",
-        "temperature": 0.7
-      },
-      "createdAt": "2025-05-28T15:49:58.455Z",
-      "updatedAt": "2025-05-28T15:49:58.455Z"
-    },
-    {
-      "id": "1748447399012",
-      "title": "New Chat",
-      "model": "llama3",
-      "messages": [],
-      "context": {
-        "systemPrompt": "You are a helpful assistant",
-        "temperature": 0.7
-      },
-      "createdAt": "2025-05-28T15:49:59.012Z",
-      "updatedAt": "2025-05-28T15:49:59.012Z"
-    },
-    {
-      "id": "1748527289491",
-      "title": "New Chat",
-      "model": "llama3",
-      "messages": [],
-      "context": {
-        "systemPrompt": "You are a helpful assistant",
-        "temperature": 0.7
-      },
-      "createdAt": "2025-05-29T14:01:29.491Z",
-      "updatedAt": "2025-05-29T14:01:29.491Z"
-    },
-    {
-      "id": "1748527976677",
-      "title": "New Chat",
-      "model": "llama3",
-      "messages": [],
-      "context": [],
-      "createdAt": "2025-05-29T14:12:56.677Z",
-      "updatedAt": "2025-05-29T14:12:56.677Z"
-    },
-    {
-      "id": "1748528060661",
-      "title": "New Chat",
-      "model": "llama3",
-      "messages": [],
-      "context": {},
-      "createdAt": "2025-05-29T14:14:20.661Z",
-      "updatedAt": "2025-05-29T14:14:20.661Z"
-    },
-    {
-      "id": "1748528200093",
-      "title": "New Chat",
-      "model": "llama3",
+      "model": "no_model",
       "messages": [
         {
           "role": "user",
           "content": "hello",
-          "timestamp": "2025-05-29T14:17:05.516Z"
+          "timestamp": "2025-05-29T16:56:31.149Z"
         },
         {
           "role": "assistant",
-          "content": " Hello! How can I assist you today? Let me know if there's something specific you'd like to discuss or learn about. If you have any questions, feel free to ask and I'll do my best to help you out!",
-          "timestamp": "2025-05-29T14:17:05.517Z"
+          "content": "¡Hola! ¿Puedo ayudarte con algo en particular? ¿Qué tienes en mente hoy?\n\n* Si necesitas ayuda con un tema relacionado con la lengua española, no dudes en preguntar.\n* Si buscas información o consejos sobre viajes a España, también puedo ser de ayuda.\n* Además, si deseas practicar tu español conmigo, ¡estoy aquí para ello!\n\nSiempre estoy encantado en ayudarte. ¿Qué necesitas hoy?",
+          "timestamp": "2025-05-29T16:56:31.149Z"
+        },
+        {
+          "role": "user",
+          "content": "my name is Michael",
+          "timestamp": "2025-05-29T16:57:00.834Z"
+        },
+        {
+          "role": "assistant",
+          "content": " Hello, Michael! It's nice to meet you. How can I help you today? Let me know if you have any questions or need assistance with something specific.",
+          "timestamp": "2025-05-29T16:57:00.834Z"
+        },
+        {
+          "role": "user",
+          "content": "what is my name?",
+          "timestamp": "2025-05-29T16:57:25.412Z"
+        },
+        {
+          "role": "assistant",
+          "content": " I'm an assistant and don't have the ability to know personal details unless they are provided by a user. If you'd like, you can tell me your name! How may I address you today?",
+          "timestamp": "2025-05-29T16:57:25.412Z"
         }
       ],
-      "context": {},
-      "createdAt": "2025-05-29T14:16:40.093Z",
-      "updatedAt": "2025-05-29T14:17:05.517Z"
+      "context": [],
+      "createdAt": "2025-05-29T16:49:10.865Z",
+      "updatedAt": "2025-05-29T16:57:25.412Z"
+    },
+    {
+      "id": "1748538258090",
+      "title": "New Chat",
+      "model": "no_model",
+      "messages": [],
+      "context": [],
+      "createdAt": "2025-05-29T17:04:18.091Z",
+      "updatedAt": "2025-05-29T17:04:18.091Z"
+    },
+    {
+      "id": "1748538421562",
+      "title": "New Chat",
+      "model": "no_model",
+      "messages": [],
+      "context": [],
+      "createdAt": "2025-05-29T17:07:01.562Z",
+      "updatedAt": "2025-05-29T17:07:01.562Z"
+    },
+    {
+      "id": "1748538504318",
+      "title": "New Chat",
+      "model": "mistral:latest",
+      "messages": [],
+      "context": [],
+      "createdAt": "2025-05-29T17:08:24.318Z",
+      "updatedAt": "2025-05-29T17:08:26.416Z"
+    },
+    {
+      "id": "1748538709011",
+      "title": "New Chat",
+      "model": "mistral:latest",
+      "messages": [],
+      "context": [],
+      "createdAt": "2025-05-29T17:11:49.011Z",
+      "updatedAt": "2025-05-29T17:11:51.144Z"
+    },
+    {
+      "id": "1748539076714",
+      "title": "New Chat",
+      "model": "mistral:latest",
+      "messages": [
+        {
+          "role": "user",
+          "content": "hello",
+          "timestamp": "2025-05-29T17:19:27.565Z"
+        },
+        {
+          "role": "assistant",
+          "content": " Hello! How can I assist you today?\n\nHere are a few things I can help you with:\n1. Answering general questions about various topics like math, science, history, literature, programming, etc.\n2. Providing explanations for complex concepts and processes in an easy-to-understand manner.\n3. Suggesting learning resources and materials, both online and offline, to help you deepen your knowledge in a specific subject.\n4. Helping you solve problems or make decisions by offering advice based on the information you provide.\n5. Assisting with brainstorming ideas for creative projects, including writing, art, music, and more.\n6. Offering tips and strategies to help you improve your skills in various areas like language learning, coding, problem-solving, etc.\n7. Providing conversation and companionship if you simply want someone to talk to.\n8. Helping you stay motivated and focused on your goals by offering encouragement and support.\n9. Assisting with organizing and managing your time effectively by suggesting productivity tips and tools.\n10. Helping you find answers to questions or solutions to problems that may be causing you frustration or confusion.\n\nIf any of the above services sound helpful, please let me know which one you'd like to focus on! I'm here to help in any way I can. 😊",
+          "timestamp": "2025-05-29T17:19:27.565Z"
+        }
+      ],
+      "context": [],
+      "createdAt": "2025-05-29T17:17:56.714Z",
+      "updatedAt": "2025-05-29T17:19:27.565Z"
+    },
+    {
+      "id": "1748539476493",
+      "title": "New Chat",
+      "model": "mistral:latest",
+      "messages": [
+        {
+          "role": "user",
+          "content": "hi, my name is Michael",
+          "timestamp": "2025-05-29T17:25:04.260Z"
+        },
+        {
+          "role": "assistant",
+          "content": " Hello, Michael! How can I help you today? Do you have a specific question or topic in mind that you would like to discuss? I'm here to assist with any tech-related queries you might have.",
+          "timestamp": "2025-05-29T17:25:04.260Z"
+        },
+        {
+          "role": "user",
+          "content": "what is my name?",
+          "timestamp": "2025-05-29T17:25:44.572Z"
+        },
+        {
+          "role": "assistant",
+          "content": " I'm sorry for any confusion, but I don't have the specific information about individual users. To help you effectively, could you please specify who you are or what topic you need assistance with?",
+          "timestamp": "2025-05-29T17:25:44.572Z"
+        }
+      ],
+      "context": [
+        3,
+        29473,
+        12782,
+        29493,
+        1354,
+        1909,
+        1117,
+        6227,
+        4,
+        1027,
+        23325,
+        29493,
+        6227,
+        29576,
+        2370,
+        1309,
+        1083,
+        2084,
+        1136,
+        3922,
+        29572,
+        3146,
+        1136,
+        1274,
+        1032,
+        3716,
+        3764,
+        1210,
+        9835,
+        1065,
+        3041,
+        1137,
+        1136,
+        1450,
+        1505,
+        1066,
+        4110,
+        29572,
+        1083,
+        29510,
+        29487,
+        2004,
+        1066,
+        6799,
+        1163,
+        1475,
+        14898,
+        29501,
+        10414,
+        24449,
+        1136,
+        2427,
+        1274,
+        29491
+      ],
+      "createdAt": "2025-05-29T17:24:36.493Z",
+      "updatedAt": "2025-05-29T17:25:44.572Z"
     }
   ]
 }

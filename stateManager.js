@@ -69,7 +69,7 @@ function addChat(chatData) {
     title: title || 'New Chat',
     model: model || 'default',
     messages: messages || [],
-    context: context || {},
+    context: Array.isArray(context) ? context : (context ? [context] : []),
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   };
@@ -105,13 +105,17 @@ function updateChat(chatId, updates) {
   const { context: newContext, ...otherUpdates } = updates;
   const currentChat = state.conversations[chatIndex];
   
+  // Handle context as an array
+  const updatedContext = Array.isArray(newContext) 
+    ? [...(currentChat.context || []), ...newContext]
+    : newContext 
+      ? [...(currentChat.context || []), newContext]
+      : currentChat.context || [];
+      
   const updatedChat = {
     ...currentChat,
     ...otherUpdates,
-    context: {
-      ...currentChat.context,
-      ...(newContext || {})
-    },
+    context: updatedContext,
     updatedAt: new Date().toISOString()
   };
   

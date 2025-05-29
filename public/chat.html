@@ -161,18 +161,35 @@
             messages.scrollTop = messages.scrollHeight;
         }
 
-        function sendMessage() {
+        async function sendMessage() {
             const input = document.getElementById('user-input');
             const message = input.value.trim();
             if (!message) return;
 
-            // Get selected model
-            const modelSelect = document.getElementById('model-select');
-            const selectedModel = modelSelect.value;
+            // Get the current chat to check its model
+            let modelToUse = '';
             
-            if (!selectedModel) {
-                alert('Please select a model first');
-                return;
+            if (currentChatId && currentChatId !== 'default') {
+                const chat = await getChat(currentChatId);
+                if (chat && chat.model && chat.model !== 'no_model') {
+                    modelToUse = chat.model;
+                }
+            }
+            
+            // If no model from chat, check the dropdown
+            if (!modelToUse) {
+                const modelSelect = document.getElementById('model-select');
+                modelToUse = modelSelect.value;
+                
+                if (!modelToUse) {
+                    alert('Please select a model first');
+                    return;
+                }
+                
+                // If we're using the dropdown model, update the chat's model
+                if (currentChatId && currentChatId !== 'default') {
+                    await updateChatModel(currentChatId, modelToUse);
+                }
             }
 
             // Add user message to chat
@@ -187,7 +204,7 @@
                 },
                 body: JSON.stringify({
                     message: message,
-                    model: selectedModel,
+                    model: modelToUse,
                     chatId: currentChatId
                 })
             })
@@ -221,18 +238,111 @@
                 const models = await response.json();
                 const modelSelect = document.getElementById('model-select');
                 
+                // Store the current model for comparison
+                let currentModel = '';
+                if (currentChatId && currentChatId !== 'default') {
+                    const currentChat = await getChat(currentChatId);
+                    if (currentChat && currentChat.model && currentChat.model !== 'no_model') {
+                        currentModel = currentChat.model;
+                    }
+                }
+                
                 // Clear existing options
-                modelSelect.innerHTML = '<option value="">Select a model...</option>';
+                modelSelect.innerHTML = '';
+                
+                // Add default option
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = currentModel ? `Current: ${currentModel}` : 'Select a model...';
+                modelSelect.appendChild(defaultOption);
                 
                 // Add available models
                 models.forEach(model => {
-                    const option = document.createElement('option');
-                    option.value = model.name;
-                    option.textContent = model.name;
-                    modelSelect.appendChild(option);
+                    // Skip the current model in the dropdown
+                    if (model.name !== currentModel) {
+                        const option = document.createElement('option');
+                        option.value = model.name;
+                        option.textContent = model.name;
+                        modelSelect.appendChild(option);
+                    }
                 });
+                
+                // Add change event listener for model selection
+                modelSelect.addEventListener('change', async (e) => {
+                    const newModel = e.target.value;
+                    if (!newModel) return; // Skip if no model selected
+                    
+                    if (currentChatId && currentChatId !== 'default') {
+                        const currentChat = await getChat(currentChatId);
+                        
+                        // Only show confirmation if there's an existing model that's different from the new one
+                        if (currentChat && currentChat.model && 
+                            currentChat.model !== 'no_model' && 
+                            currentChat.model !== newModel) {
+                            
+                            // Show confirmation dialog for model change
+                            if (!confirm(`You're about to change the model from ${currentChat.model} to ${newModel}. This will affect all future messages in this chat. Continue?`)) {
+                                // User cancelled, reset the dropdown
+                                e.target.value = '';
+                                defaultOption.textContent = `Current: ${currentChat.model}`;
+                                return;
+                            }
+                            // If user confirms, fall through to update the model
+                        }
+                        
+                        // Update the model (this handles both new model and confirmed changes)
+                        const success = await updateChatModel(currentChatId, newModel);
+                        if (success) {
+                            defaultOption.textContent = `Current: ${newModel}`;
+                        } else {
+                            // Reset to show current model if update failed
+                            const currentModel = currentChat?.model || 'no_model';
+                            defaultOption.textContent = currentModel === 'no_model' ? 'Select a model...' : `Current: ${currentModel}`;
+                        }
+                    }
+                    
+                    // Reset the dropdown
+                    e.target.value = '';
+                });
+                
             } catch (error) {
                 console.error('Error loading models:', error);
+            }
+        }
+        
+        // Helper function to get a chat by ID
+        async function getChat(chatId) {
+            try {
+                const response = await fetch(`/api/chats/${chatId}`);
+                if (!response.ok) return null;
+                return await response.json();
+            } catch (error) {
+                console.error('Error getting chat:', error);
+                return null;
+            }
+        }
+        
+        // Helper function to update a chat's model
+        async function updateChatModel(chatId, newModel) {
+            try {
+                const response = await fetch(`/api/chats/${chatId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ model: newModel })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to update chat model: ${response.status}`);
+                }
+                
+                console.log(`Updated chat ${chatId} model to ${newModel}`);
+                return true;
+            } catch (error) {
+                console.error('Error updating chat model:', error);
+                alert('Failed to update chat model. Please try again.');
+                return false;
             }
         }
 
@@ -362,26 +472,42 @@
         
         // Create a new chat
         async function createNewChat() {
+            console.log('Creating new chat...');
             try {
+                const chatData = {
+                    title: 'New Chat',
+                    model: 'no_model',  // Default model
+                    messages: [],
+                    context: []  // Changed to empty array
+                };
+                
+                console.log('Sending request to /api/chats with data:', chatData);
+                
                 const response = await fetch('/api/chats', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({
-                        title: 'New Chat',
-                        model: 'llama3',  // Default model
-                        messages: [],
-                        context: {}
-                    })
+                    body: JSON.stringify(chatData)
                 });
                 
+                console.log('Received response, status:', response.status);
+                
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'Failed to create chat');
+                    let errorText;
+                    try {
+                        errorText = await response.text();
+                        console.error('Error response text:', errorText);
+                        const errorData = JSON.parse(errorText);
+                        throw new Error(errorData.error || `Failed to create chat: ${response.status} ${response.statusText}`);
+                    } catch (e) {
+                        console.error('Error parsing error response:', e);
+                        throw new Error(`HTTP error! status: ${response.status}, body: ${errorText || 'No error details'}`);
+                    }
                 }
                 
                 const newChat = await response.json();
+                console.log('Successfully created chat:', newChat);
                 
                 // Add the new chat to the sidebar
                 addChatToSidebar(newChat);
