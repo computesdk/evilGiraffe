@@ -107,6 +107,56 @@
       },
       "createdAt": "2025-05-28T15:49:59.012Z",
       "updatedAt": "2025-05-28T15:49:59.012Z"
+    },
+    {
+      "id": "1748527289491",
+      "title": "New Chat",
+      "model": "llama3",
+      "messages": [],
+      "context": {
+        "systemPrompt": "You are a helpful assistant",
+        "temperature": 0.7
+      },
+      "createdAt": "2025-05-29T14:01:29.491Z",
+      "updatedAt": "2025-05-29T14:01:29.491Z"
+    },
+    {
+      "id": "1748527976677",
+      "title": "New Chat",
+      "model": "llama3",
+      "messages": [],
+      "context": [],
+      "createdAt": "2025-05-29T14:12:56.677Z",
+      "updatedAt": "2025-05-29T14:12:56.677Z"
+    },
+    {
+      "id": "1748528060661",
+      "title": "New Chat",
+      "model": "llama3",
+      "messages": [],
+      "context": {},
+      "createdAt": "2025-05-29T14:14:20.661Z",
+      "updatedAt": "2025-05-29T14:14:20.661Z"
+    },
+    {
+      "id": "1748528200093",
+      "title": "New Chat",
+      "model": "llama3",
+      "messages": [
+        {
+          "role": "user",
+          "content": "hello",
+          "timestamp": "2025-05-29T14:17:05.516Z"
+        },
+        {
+          "role": "assistant",
+          "content": " Hello! How can I assist you today? Let me know if there's something specific you'd like to discuss or learn about. If you have any questions, feel free to ask and I'll do my best to help you out!",
+          "timestamp": "2025-05-29T14:17:05.517Z"
+        }
+      ],
+      "context": {},
+      "createdAt": "2025-05-29T14:16:40.093Z",
+      "updatedAt": "2025-05-29T14:17:05.517Z"
     }
   ]
 }
