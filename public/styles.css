@@ -115,6 +115,88 @@ body {
     gap: 1rem;
 }
 
+/* Documentation Styles */
+.docs-page-container {
+    padding: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.docs-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.docs-header h1 {
+    color: #2c3e50;
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.docs-content {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+}
+
+.docs-section {
+    margin-bottom: 3rem;
+}
+
+.section-header {
+    margin-bottom: 1.5rem;
+}
+
+.section-header h2 {
+    color: #2c3e50;
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.docs-section p {
+    color: #333;
+    line-height: 1.8;
+    margin-bottom: 1.5rem;
+}
+
+.docs-section ul {
+    margin-bottom: 1.5rem;
+}
+
+.docs-section ul li {
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.docs-section h3 {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    font-size: 1.4rem;
+}
+
+/* FAQ Styling */
+.faq-list {
+    margin: 0;
+    padding: 0;
+}
+
+.faq-list dt {
+    font-size: 1.2rem;
+    color: #2c3e50;
+    font-weight: 500;
+    margin: 1rem 0 0.5rem;
+    padding-left: 10px;
+    border-left: 3px solid #3498db;
+}
+
+.faq-list dd {
+    margin: 0;
+    padding-left: 15px;
+    color: #333;
+    line-height: 1.6;
+}
+
 /* Chat Page Layout */
 .chat-page-container {
     display: flex;
