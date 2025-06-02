@@ -5,18 +5,7 @@ Open-source AI chat. Local-first. Questionably supervised.
 
 
 
-Welcome to Evil Giraffe, a very real software project (despite what the current repo activity might suggest), where you'll soon be able to:
 
-Download any Ollama open-source AI model
-
-Chat with it locally using a sleek interface
-
-Save your conversations for posterity (or blackmail)
-
-Switch between models that you download or create
-
-Important:
-You cannot use this app yet. It's under active development by one unpaid intern (me) and creatively guided by Garrison, who is entirely to blame.
 
 What Evil Giraffe Will Be
 When it’s ready, Evil Giraffe will be:
@@ -28,6 +17,9 @@ A clean, fun, non-technical way to run powerful AI on your own machine
 Packed with features like multi-model switching, chat saving, and a UI that doesn’t make your eyes bleed
 
 It’s for writers, tinkerers, curious humans, and people who love giraffes but also distrust the cloud.
+
+Important:
+You cannot use this app yet. It's under active development by one unpaid intern (me) and creatively guided by Garrison, who is entirely to blame.
 
 Current Status
 Not even close.
