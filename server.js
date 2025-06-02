@@ -165,19 +165,40 @@ app.post('/api/chat', async (req, res) => {
                 if (chatId && chatId !== 'default') {
                     const chat = stateManager.getChatById(chatId);
                     if (chat) {
-                        chat.messages = chat.messages || [];
-                        chat.messages.push({
+                        // Update model if it's 'no_model'
+                        const updates = {};
+                        if (chat.model === 'no_model' || !chat.model) {
+                            updates.model = model;
+                            console.log(`Updating chat model from '${chat.model}' to '${model}'`);
+                        }
+                        
+                        // Add messages
+                        const messages = [...(chat.messages || [])];
+                        messages.push({
                             role: 'user',
                             content: message,
                             timestamp: new Date().toISOString()
                         });
-                        chat.messages.push({
+                        messages.push({
                             role: 'assistant',
                             content: responseText,
                             timestamp: new Date().toISOString()
                         });
-                        stateManager.updateChat(chatId, chat);
-                        console.log('Message stored successfully in chat:', chatId);
+                        
+                        // Update context if provided in the response
+                        const context = response.data?.context;
+                        if (Array.isArray(context)) {
+                            console.log('Storing context array in chat:', context);
+                            updates.context = context;
+                        }
+                        
+                        // Update chat with new messages, context, and model (if changed)
+                        stateManager.updateChat(chatId, {
+                            ...updates,
+                            messages: messages,
+                            updatedAt: new Date().toISOString()
+                        });
+                        console.log('Message and context stored successfully in chat:', chatId);
                     }
                 }
             } catch (error) {
@@ -207,6 +228,34 @@ app.post('/api/chat', async (req, res) => {
             details: error.message 
         });
         return; // Prevent further execution
+    }
+});
+
+// Endpoint to update a chat's model
+app.patch('/api/chats/:chatId', (req, res) => {
+    try {
+        const { chatId } = req.params;
+        const { model } = req.body;
+        
+        if (!model) {
+            return res.status(400).json({ error: 'Model is required' });
+        }
+        
+        const chat = stateManager.getChatById(chatId);
+        if (!chat) {
+            return res.status(404).json({ error: 'Chat not found' });
+        }
+        
+        // Update the chat's model
+        const updatedChat = stateManager.updateChat(chatId, { model });
+        
+        res.json(updatedChat);
+    } catch (error) {
+        console.error('Error updating chat model:', error);
+        res.status(500).json({ 
+            error: 'Failed to update chat model',
+            details: error.message 
+        });
     }
 });
 
