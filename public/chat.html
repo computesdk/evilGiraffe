@@ -282,13 +282,37 @@
         let currentChatId = 'default';
         
         // Initialize chat list
-        function initChatList() {
-            const newChatBtn = document.getElementById('new-chat-btn');
-            
-            // Handle new chat button
-            newChatBtn.addEventListener('click', () => {
-                createNewChat();
-            });
+        async function initChatList() {
+            try {
+                // Read state.json
+                const response = await fetch('/state.json');
+                const data = await response.json();
+                
+                // Add default chat
+                addChatToSidebar({
+                    id: 'default',
+                    title: 'New Chat'
+                });
+                
+                // Add existing chats from state.json
+                data.conversations.forEach(chat => {
+                    addChatToSidebar({
+                        id: chat.id,
+                        title: chat.title,
+                        model: chat.model
+                    });
+                });
+                
+                // Update welcome message visibility
+                updateWelcomeMessage();
+            } catch (error) {
+                console.error('Error loading chats:', error);
+                // Still add default chat even if there's an error
+                addChatToSidebar({
+                    id: 'default',
+                    title: 'New Chat'
+                });
+            }
         }
         
         // Add chat to sidebar
@@ -457,7 +481,7 @@
 
         
         // Delete a chat
-        function deleteChat(event, chatId) {
+        async function deleteChat(event, chatId) {
             event.stopPropagation(); // Prevent triggering the chat item click
             
             if (chatId === 'default') {
@@ -468,15 +492,36 @@
             }
             
             if (confirm('Are you sure you want to delete this chat?')) {
-                // Remove from UI
-                const chatItem = document.querySelector(`.chat-item[data-chat-id="${chatId}"]`);
-                if (chatItem) {
-                    chatItem.remove();
-                }
-                
-                // If we deleted the active chat, switch to default
-                if (currentChatId === chatId) {
-                    switchChat('default', 'New Chat');
+                try {
+                    // Remove from UI
+                    const chatItem = document.querySelector(`.chat-item[data-chat-id="${chatId}"]`);
+                    if (chatItem) {
+                        chatItem.remove();
+                    }
+                    
+                    // If we deleted the active chat, switch to default
+                    if (currentChatId === chatId) {
+                        switchChat('default', 'New Chat');
+                    }
+                    
+                    // Remove from state.json via server
+                    const response = await fetch(`/api/chats/${chatId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`Failed to delete chat: ${response.status}`);
+                    }
+                    
+                    console.log('Chat deleted successfully');
+                } catch (error) {
+                    console.error('Error deleting chat:', error);
+                    alert('Failed to delete chat. Please try again.');
+                    // Re-add the chat to UI if deletion failed
+                    const chat = await getChat(chatId);
+                    if (chat) {
+                        addChatToSidebar(chat);
+                    }
                 }
             }
         }
@@ -505,16 +550,9 @@
         }
 
         // Load models and initialize chat list when page loads
-        window.addEventListener('load', () => {
-            loadModels();
-            initChatList();
-            updateWelcomeMessage();
-            // Show welcome message for the default chat
-            showWelcomeMessage();
-        });
-
-        // Handle Enter key
-        document.getElementById('user-input').addEventListener('keypress', function(e) {
+        window.addEventListener('load', async () => {
+            await loadModels();
+            await initChatList();
             if (e.key === 'Enter') {
                 sendMessage();
             }
