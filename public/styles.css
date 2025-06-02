@@ -121,6 +121,73 @@ body {
     height: calc(100vh - 60px);
 }
 
+/* Welcome message styles */
+#welcome-message {
+    color: #666;
+    text-align: center;
+    padding: 2rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+#welcome-message h2 {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    font-size: 1.8rem;
+}
+
+#welcome-message p {
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+/* Center chat messages content when empty */
+.chat-messages:empty {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 300px;
+    text-align: center;
+}
+
+/* Chat input container */
+.chat-input-container {
+    display: none; /* Hidden by default */
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+    background: white;
+    border-top: 1px solid #e1e1e1;
+}
+
+/* Show input container when a chat is active */
+.chat-window.has-active-chat .chat-input-container {
+    display: flex;
+}
+
+/* Model selector styles */
+.model-selector-container {
+    padding: 0.5rem 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+}
+
+.model-selector-container label {
+    margin-right: 0.5rem;
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.model-selector-container select {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+}
+
 /* Sidebar styles */
 .sidebar {
     width: 250px;
