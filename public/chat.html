@@ -68,7 +68,7 @@
     </footer>
 
     <script>
-        function addMessage(text, isUser) {
+        function addMessage(text, isUser, timestamp) {
             const messages = document.getElementById('chat-messages');
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
@@ -80,12 +80,12 @@
             messageText.className = 'message-text';
             messageText.textContent = text;
             
-            const timestamp = document.createElement('div');
-            timestamp.className = 'message-timestamp';
-            timestamp.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const timestampDiv = document.createElement('div');
+            timestampDiv.className = 'message-timestamp';
+            timestampDiv.textContent = timestamp ? new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             
             messageContent.appendChild(messageText);
-            messageContent.appendChild(timestamp);
+            messageContent.appendChild(timestampDiv);
             messageDiv.appendChild(messageContent);
             messages.appendChild(messageDiv);
             
@@ -296,11 +296,7 @@
                 
                 // Add existing chats from state.json
                 data.conversations.forEach(chat => {
-                    addChatToSidebar({
-                        id: chat.id,
-                        title: chat.title,
-                        model: chat.model
-                    });
+                    addChatToSidebar(chat);
                 });
                 
                 // Update welcome message visibility
@@ -322,10 +318,8 @@
             chatItem.className = 'chat-item';
             chatItem.dataset.chatId = chat.id;
             
-            // Format timestamp if it's a date string, otherwise use current time
-            const timestamp = chat.createdAt ? 
-                new Date(chat.createdAt).toLocaleTimeString() : 
-                new Date().toLocaleTimeString();
+            // Use the createdAt timestamp from the chat object if it exists, otherwise use current time
+            const timestamp = chat.createdAt ? new Date(chat.createdAt) : new Date();
             
             // Create chat item content
             const titleSpan = document.createElement('span');
@@ -334,7 +328,7 @@
             
             const timeSpan = document.createElement('span');
             timeSpan.className = 'chat-time';
-            timeSpan.textContent = timestamp;
+            timeSpan.textContent = timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             
             // Create delete button
             const actionsDiv = document.createElement('div');
@@ -377,21 +371,20 @@
             return chatItem;
         }
         
-        // Show welcome message
-        function showWelcomeMessage() {
-            const messagesContainer = document.getElementById('chat-messages');
-            messagesContainer.innerHTML = `
-                <div class="message bot-message">
-                    <div class="message-content">
-                        <div class="message-text">Welcome! How can I assist you today?</div>
-                        <div class="message-timestamp">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-                    </div>
-                </div>
-            `;
+        // Display chat messages
+        function displayMessages(messages) {
+            if (!messages) return;
+            const messagesDiv = document.getElementById('chat-messages');
+            messagesDiv.innerHTML = '';
+            
+            messages.forEach(message => {
+                // Use content instead of message as per state.json format
+                addMessage(message.content, message.role === 'user', message.timestamp);
+            });
         }
 
         // Switch to a different chat
-        function switchChat(chatId, title) {
+        async function switchChat(chatId, title) {
             currentChatId = chatId;
             const chatWindow = document.querySelector('.chat-window');
             const isDefaultChat = chatId === 'default';
@@ -409,15 +402,26 @@
             // Update active state in UI
             updateActiveChat(chatId);
             
-            // Clear chat messages and show welcome message
+            // Clear chat messages
             const messagesContainer = document.getElementById('chat-messages');
             messagesContainer.innerHTML = '';
             
-            // Only show welcome message if this is the default chat or there are no messages
-            if (isDefaultChat || !document.querySelector(`.chat-item[data-chat-id="${chatId}"]`)) {
+            // Show welcome message or display messages
+            if (isDefaultChat) {
                 showWelcomeMessage();
             } else {
-                // TODO: Load chat messages for the selected chat
+                try {
+                    const chat = await getChat(chatId);
+                    if (chat && chat.messages && chat.messages.length > 0) {
+                        displayMessages(chat.messages);
+                    } else {
+                        // If no messages, show a default message
+                        addMessage('This chat is empty. Start sending messages!', false);
+                    }
+                } catch (error) {
+                    console.error('Error loading chat messages:', error);
+                    addMessage('Failed to load chat messages. Please try refreshing.', false);
+                }
             }
             
             // Focus the input if we're not on the default chat
@@ -425,20 +429,32 @@
                 document.getElementById('user-input').focus();
             }
         }
-        
+
+        // Show welcome message
+        function showWelcomeMessage() {
+            const messagesContainer = document.getElementById('chat-messages');
+            messagesContainer.innerHTML = `
+                <div class="message bot-message">
+                    <div class="message-content">
+                        <div class="message-text">Welcome! How can I assist you today?</div>
+                        <div class="message-timestamp">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                    </div>
+                </div>
+            `;
+        }
+
         // Create a new chat
-        async function createNewChat() {
-            console.log('Creating new chat...');
+        async function createChat() {
+            const chatData = {
+                title: 'New Chat',
+                model: 'no_model',  // Default model
+                messages: [],
+                context: []  // Changed to empty array
+            };
+            
+            console.log('Sending request to /api/chats with data:', chatData);
+            
             try {
-                const chatData = {
-                    title: 'New Chat',
-                    model: 'no_model',  // Default model
-                    messages: [],
-                    context: []  // Changed to empty array
-                };
-                
-                console.log('Sending request to /api/chats with data:', chatData);
-                
                 const response = await fetch('/api/chats', {
                     method: 'POST',
                     headers: {
