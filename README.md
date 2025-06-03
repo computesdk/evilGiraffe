@@ -15,7 +15,7 @@ When it's ready, Evil Giraffe will be:
 - 100% local: no data sent to the cloud, the feds, or anyone named Michael
 - Packed with features like multi-model switching, chat saving, and a UI that doesn’t make your eyes bleed
 
-It's for writers, tinkerers, curious humans, and people who love giraffes but also distrust the cloud.
+It's for writers, tinkerers, curious humans, and people who fear giraffes but also distrust the cloud.
 
 ## Important
 
@@ -46,7 +46,7 @@ Please don’t.
 If you open an issue on this unfinished repo, I will assume you:
 
 - Didn't read anything above
-- Deserve to stub your toe on a Lego
+- Deserve to step on a Lego
 - Are, in fact, Garrison, testing me
 
 Issues will be closed with prejudice. Possibly with memes. Definitely with sarcasm.
@@ -61,4 +61,4 @@ I’m tired.
 
 Garrison’s making another startup tomorrow.
 
-If you file a bug report, I will throw you into the metaphorical savannah.
+If you file a bug report, I will throw you into the savannah with the giraffes.
