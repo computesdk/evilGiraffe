@@ -443,10 +443,18 @@
             `;
         }
 
-        // Create a new chat
+        // Create a new chat with a random name
         async function createChat() {
+            const adjectives = ['Mysterious', 'Clever', 'Witty', 'Playful', 'Sly', 'Curious', 'Eager', 'Jolly', 'Kind', 'Lively', 'Merry', 'Proud', 'Silly', 'Wise', 'Zany', 'Murderous', 'Evil', 'Zealous', 'Destructive'];
+            const nouns = ['Giraffe', 'Llama', 'Panda', 'Koala', 'Penguin', 'Otter', 'Sloth', 'Fox', 'Owl', 'Raccoon', 'Tiger', 'Dolphin', 'Panda', 'Koala', 'Penguin'];
+            
+            // Generate random name
+            const randomAdjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+            const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
+            const randomName = `${randomAdjective} ${randomNoun}`;
+            
             const chatData = {
-                title: 'New Chat',
+                title: randomName,
                 model: 'no_model',  // Default model
                 messages: [],
                 context: []  // Changed to empty array
