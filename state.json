@@ -1,3 +1,13 @@
 {
-  "conversations": []
+  "conversations": [
+    {
+      "id": "1749130823154",
+      "title": "New Chat",
+      "model": "no_model",
+      "messages": [],
+      "context": [],
+      "createdAt": "2025-06-05T13:40:23.154Z",
+      "updatedAt": "2025-06-05T13:40:23.154Z"
+    }
+  ]
 }

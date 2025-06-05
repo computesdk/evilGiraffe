@@ -569,6 +569,7 @@
         window.addEventListener('load', async () => {
             await loadModels();
             await initChatList();
+            document.getElementById('new-chat-btn').addEventListener('click', createChat);
             if (e.key === 'Enter') {
                 sendMessage();
             }
