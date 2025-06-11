@@ -82,81 +82,44 @@ app.post('/api/chat', async (req, res) => {
         });
         
         // Get the current chat to get its context
-        const chat = chatId ? (stateManager.getChatById(chatId) || { context: {} }) : { context: {} };
-        const context = chat.context || {};
+        const chat = chatId ? (stateManager.getChatById(chatId) || { context: [] }) : { context: [] };
+        const context = Array.isArray(chat.context) ? chat.context : [];
         
-        console.log('Using chat context:', context);
+        console.log('=== CONTEXT USED FOR MESSAGE GENERATION ===');
+        console.log('Context type:', Array.isArray(context) ? 'Array' : typeof context);
+        console.log('Context content:', JSON.stringify(context, null, 2));
+        console.log('=========================================');
 
         try {
             let response;
             let responseText = '';
             
-            if (Object.keys(context).length === 0) {
-                console.log('No context found, using generate endpoint with model:', model);
-                
-                response = await axios.post('http://localhost:11434/api/generate', {
-                    model: model,
-                    stream: false,
-                    prompt: message
-                }, {
-                    responseType: 'json',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                console.log('Generate response:', response.data);
-                
-                // Extract response text
-                if (response.data?.response) {
-                    responseText = response.data.response;
-                    console.log('Got response text from generate endpoint:', responseText);
-                } else {
-                    console.warn('No response found in data from generate endpoint');
-                    console.log('Full response:', response.data);
-                    throw new Error('No response from the model');
+            console.log('Using generate endpoint with model:', model);
+            
+            console.log('Sending to generate endpoint with context:', Array.isArray(context) ? context : 'No valid context');
+            
+            response = await axios.post('http://localhost:11434/api/generate', {
+                model: model,
+                stream: false,
+                prompt: message,
+                context: context.length > 0 ? context : undefined
+            }, {
+                responseType: 'json',
+                headers: {
+                    'Content-Type': 'application/json'
                 }
+            });
+
+            console.log('Generate response:', response.data);
+            
+            // Extract response text
+            if (response.data?.response) {
+                responseText = response.data.response;
+                console.log('Got response text from generate endpoint:', responseText);
             } else {
-                console.log('Context found, using chat endpoint with model:', model);
-                const formattedContext = typeof context === 'string' ? context : 
-                    (context.systemPrompt || 'You are a helpful assistant');
-                    
-                console.log('Using context:', formattedContext);
-
-                response = await axios.post('http://localhost:11434/api/chat', {
-                    model: model,
-                    stream: false,
-                    messages: [
-                        {
-                            role: "system",
-                            content: formattedContext
-                        },
-                        {
-                            role: "user",
-                            content: message
-                        }
-                    ]
-                }, {
-                    responseType: 'json',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                console.log('Chat response:', response.data);
-                
-                // Extract response text from chat endpoint
-                if (response.data?.message?.content) {
-                    responseText = response.data.message.content;
-                    console.log('Got response text from chat endpoint:', responseText);
-                } else if (response.data?.response) {
-                    responseText = response.data.response;
-                    console.log('Got response text from chat endpoint (legacy format):', responseText);
-                } else {
-                    console.warn('No response found in data from chat endpoint');
-                    console.log('Full response:', response.data);
-                    throw new Error('No valid response from the model');
-                }
+                console.warn('No response found in data from generate endpoint');
+                console.log('Full response:', response.data);
+                throw new Error('No response from the model');
             }
 
             // Store user message in database
@@ -380,94 +343,7 @@ app.delete('/api/chats/:id', (req, res) => {
     }
 });
 
-// Endpoint to handle chat messages
-app.post('/api/chat', async (req, res) => {
-    try {
-        // Get message and model from request body
-        const { message, model } = req.body;
-        console.log('New chat message received:', {
-            model: model,
-            message: message
-        });
-        
-        // Initialize messageContext as an empty array to hold Ollama's context
-        let messageContext = [];
-        let responseText = '';
-        
-        // Send message to Ollama using chat API
-        console.log('Sending message to Ollama...');
-        console.log('Request body:', {
-            model: model,
-            messages: [{
-                role: "user",
-                content: message
-            }]
-        });
 
-        try {
-            // Log the context being sent to Ollama
-            console.log('Sending context to Ollama:', messageContext.length > 0 ? messageContext : 'No context');
-            
-            const response = await axios.post('http://localhost:11434/api/generate', {
-                model: model,
-                prompt: message,
-                stream: false,
-                context: messageContext.length > 0 ? messageContext : undefined
-            }, {
-                responseType: 'json', // Try with regular JSON response first
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            // Handle the response
-            try {
-                // The /api/generate endpoint returns the response directly in the response property
-                if (response.data?.response) {
-                    responseText = response.data.response;
-                    console.log('Got response text:', responseText);
-                } else {
-                    console.warn('No response found in data');
-                    console.log('Full response:', response.data);
-                }
-
-                // Get and store context if available
-                if (response.data?.context) {
-                    messageContext = response.data.context;
-                    console.log('Got context from Ollama:', messageContext);
-                } else {
-                    console.log('No context received from Ollama');
-                }
-            } catch (error) {
-                console.error('Failed to parse Ollama response:', error);
-                console.log('Raw response:', response.data);
-            }
-
-            console.log('Final response text:', responseText);
-            res.json({ response: responseText });
-
-        } catch (error) {
-            console.error('Error making request to Ollama:', error);
-            console.error('Error details:', error.response?.data || error.message);
-            if (error.response) {
-                console.error('Response status:', error.response.status);
-                console.error('Response headers:', error.response.headers);
-                console.error('Response data:', error.response.data);
-            }
-            res.status(500).json({ 
-                error: 'Failed to process chat message',
-                details: error.response?.data || error.message 
-            });
-        }
-    } catch (error) {
-        console.error('Error processing chat:', error);
-        console.error('Error details:', error.response?.data || error.message);
-        res.status(500).json({ 
-            error: 'Failed to process chat message',
-            details: error.response?.data || error.message 
-        });
-    }
-});
 
 // Start the server
 app.listen(PORT, () => {
